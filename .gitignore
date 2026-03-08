@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# Database & logs
+data/career.db
+data/*.log
+
+# Resume outputs (generated files)
+resume/*.docx
+resume/*.pdf
+
+# Secrets / config override
+.env
+*.secret.yaml
+
+# Node
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
