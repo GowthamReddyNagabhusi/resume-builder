@@ -1,0 +1,167 @@
+2026-03-06 13:25:20,153 [AGENT] INFO ==================================================
+2026-03-06 13:25:20,154 [AGENT] INFO Career Agent starting up...
+2026-03-06 13:25:20,155 [AGENT] INFO Profile: Nagabhusi Gowtham Reddy
+2026-03-06 13:25:20,156 [AGENT] INFO ==================================================
+2026-03-06 13:25:20,158 [AGENT] INFO Running initial stats fetch...
+2026-03-06 13:25:20,161 [AGENT] INFO Scheduled: updating stats...
+2026-03-06 13:25:20,162 [AGENT] INFO Stats fetch scheduled every 6h
+2026-03-06 13:25:20,163 [AGENT] INFO Resume generation scheduled daily at 08:00
+2026-03-06 13:25:20,164 [AGENT] INFO Nightly report scheduled at 20:00
+2026-03-06 13:25:20,165 [AGENT] INFO Telegram bot thread started.
+2026-03-06 13:25:25,309 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getMe "HTTP/1.1 200 OK"
+2026-03-06 13:25:25,312 [AGENT] INFO Scheduler running (tick every 30s)...
+2026-03-06 13:25:25,322 [AGENT] INFO Scheduled: updating stats...
+2026-03-06 13:25:25,551 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/deleteWebhook "HTTP/1.1 200 OK"
+2026-03-06 13:25:25,553 [AGENT] INFO Application started
+2026-03-06 13:25:27,931 [AGENT] INFO Stats update complete.
+2026-03-06 13:25:31,269 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:25:31,663 [AGENT] INFO Stats update complete.
+2026-03-06 13:25:32,497 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/sendMessage "HTTP/1.1 200 OK"
+2026-03-06 13:25:39,019 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:25:40,147 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/sendMessage "HTTP/1.1 200 OK"
+2026-03-06 13:25:47,931 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:25:49,085 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/sendMessage "HTTP/1.1 200 OK"
+2026-03-06 13:25:49,512 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/sendMessage "HTTP/1.1 200 OK"
+2026-03-06 13:26:06,182 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:26:09,080 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/sendDocument "HTTP/1.1 200 OK"
+2026-03-06 13:26:09,589 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/sendMessage "HTTP/1.1 200 OK"
+2026-03-06 13:26:16,578 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:26:26,789 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:26:30,403 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:26:31,710 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/sendMessage "HTTP/1.1 200 OK"
+2026-03-06 13:26:40,778 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:26:51,019 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:27:01,259 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:27:11,522 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:27:21,974 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:27:32,292 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:27:42,533 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:27:52,761 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:28:03,000 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:28:13,253 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:28:23,480 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:28:33,823 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:28:44,062 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:28:54,303 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:29:04,547 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:29:14,894 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:29:25,104 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:29:35,391 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:29:45,678 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:29:56,060 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:30:06,276 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:30:16,759 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:32:55,263 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:33:09,560 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:33:11,377 [AGENT] INFO Agent stopped by user.
+2026-03-06 13:38:19,379 [AGENT] INFO ==================================================
+2026-03-06 13:38:19,380 [AGENT] INFO Career Agent starting up...
+2026-03-06 13:38:19,381 [AGENT] INFO Profile: Nagabhusi Gowtham Reddy
+2026-03-06 13:38:19,381 [AGENT] INFO ==================================================
+2026-03-06 13:38:19,382 [AGENT] INFO Running initial stats fetch...
+2026-03-06 13:38:19,384 [AGENT] INFO Scheduled: updating stats...
+2026-03-06 13:38:19,385 [AGENT] INFO Stats fetch scheduled every 6h
+2026-03-06 13:38:19,386 [AGENT] INFO Resume generation scheduled daily at 08:00
+2026-03-06 13:38:19,387 [AGENT] INFO Nightly report scheduled at 20:00
+2026-03-06 13:38:19,389 [AGENT] INFO Telegram bot thread started.
+2026-03-06 13:38:23,795 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getMe "HTTP/1.1 200 OK"
+2026-03-06 13:38:24,005 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/deleteWebhook "HTTP/1.1 200 OK"
+2026-03-06 13:38:24,007 [AGENT] INFO Application started
+2026-03-06 13:38:24,411 [AGENT] INFO Scheduler running (tick every 30s)...
+2026-03-06 13:38:24,413 [AGENT] INFO Scheduled: updating stats...
+2026-03-06 13:38:29,721 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:38:30,647 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/sendMessage "HTTP/1.1 200 OK"
+2026-03-06 13:38:30,665 [AGENT] INFO Stats update complete.
+2026-03-06 13:38:31,912 [AGENT] INFO Stats update complete.
+2026-03-06 13:38:39,659 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 13:38:40,678 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/sendMessage "HTTP/1.1 200 OK"
+2026-03-06 13:38:41,190 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/sendMessage "HTTP/1.1 200 OK"
+2026-03-06 13:41:08,727 [AGENT] INFO Agent stopped by user.
+2026-03-06 18:57:13,516 [AGENT] INFO ==================================================
+2026-03-06 18:57:13,517 [AGENT] INFO Career Agent starting up...
+2026-03-06 18:57:13,517 [AGENT] INFO Profile: Nagabhusi Gowtham Reddy
+2026-03-06 18:57:13,518 [AGENT] INFO ==================================================
+2026-03-06 18:57:13,518 [AGENT] INFO Running initial stats fetch...
+2026-03-06 18:57:13,523 [AGENT] INFO Scheduled: updating stats...
+2026-03-06 18:57:13,523 [AGENT] INFO Stats fetch scheduled every 6h
+2026-03-06 18:57:13,528 [AGENT] INFO Resume generation scheduled daily at 08:00
+2026-03-06 18:57:13,530 [AGENT] INFO Nightly report scheduled at 20:00
+2026-03-06 18:57:13,546 [AGENT] INFO Telegram bot thread started.
+2026-03-06 18:57:18,502 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getMe "HTTP/1.1 200 OK"
+2026-03-06 18:57:18,706 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/deleteWebhook "HTTP/1.1 200 OK"
+2026-03-06 18:57:18,709 [AGENT] INFO Application started
+2026-03-06 18:57:18,914 [AGENT] INFO Scheduler running (tick every 30s)...
+2026-03-06 18:57:18,916 [AGENT] INFO Scheduled: updating stats...
+2026-03-06 18:57:24,666 [AGENT] INFO Stats update complete.
+2026-03-06 18:57:27,533 [AGENT] INFO Stats update complete.
+2026-03-06 18:57:29,454 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 18:57:30,686 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 18:57:31,924 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/sendMessage "HTTP/1.1 200 OK"
+2026-03-06 18:57:40,928 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 18:57:47,378 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 18:57:49,938 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/sendMessage "HTTP/1.1 200 OK"
+2026-03-06 18:57:57,717 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 18:57:58,232 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 18:57:59,154 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/sendMessage "HTTP/1.1 200 OK"
+2026-03-06 18:57:59,564 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/sendMessage "HTTP/1.1 200 OK"
+2026-03-06 18:58:47,137 [AGENT] INFO Agent stopped by user.
+2026-03-06 18:58:49,416 [AGENT] INFO ==================================================
+2026-03-06 18:58:49,417 [AGENT] INFO Career Agent starting up...
+2026-03-06 18:58:49,418 [AGENT] INFO Profile: Nagabhusi Gowtham Reddy
+2026-03-06 18:58:49,418 [AGENT] INFO ==================================================
+2026-03-06 18:58:49,419 [AGENT] INFO Running initial stats fetch...
+2026-03-06 18:58:49,422 [AGENT] INFO Scheduled: updating stats...
+2026-03-06 18:58:49,423 [AGENT] INFO Stats fetch scheduled every 6h
+2026-03-06 18:58:49,424 [AGENT] INFO Resume generation scheduled daily at 08:00
+2026-03-06 18:58:49,425 [AGENT] INFO Nightly report scheduled at 20:00
+2026-03-06 18:58:49,426 [AGENT] INFO Telegram bot thread started.
+2026-03-06 18:58:54,055 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getMe "HTTP/1.1 200 OK"
+2026-03-06 18:58:54,248 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/deleteWebhook "HTTP/1.1 200 OK"
+2026-03-06 18:58:54,250 [AGENT] INFO Application started
+2026-03-06 18:58:54,552 [AGENT] INFO Scheduler running (tick every 30s)...
+2026-03-06 18:58:54,553 [AGENT] INFO Scheduled: updating stats...
+2026-03-06 18:59:00,733 [AGENT] INFO Stats update complete.
+2026-03-06 18:59:03,069 [AGENT] INFO Stats update complete.
+2026-03-06 18:59:04,893 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 18:59:11,553 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 18:59:12,388 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/sendMessage "HTTP/1.1 200 OK"
+2026-03-06 18:59:14,419 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 18:59:14,932 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/sendMessage "HTTP/1.1 200 OK"
+2026-03-06 18:59:24,660 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 18:59:27,832 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/getUpdates "HTTP/1.1 200 OK"
+2026-03-06 18:59:28,858 [AGENT] INFO HTTP Request: POST https://api.telegram.org/bot8638966907:AAHbPFrFYDmppB28lm2yx1T_o9tjyazPFSE/sendMessage "HTTP/1.1 200 OK"
+2026-03-06 18:59:40,871 [AGENT] INFO Agent stopped by user.
+2026-03-06 19:31:46,466 [AGENT] INFO ==================================================
+2026-03-06 19:31:46,467 [AGENT] INFO Career Agent starting up...
+2026-03-06 19:31:46,467 [AGENT] INFO Profile: Nagabhusi Gowtham Reddy
+2026-03-06 19:31:46,467 [AGENT] INFO Using Groq API for AI generation (Faster & more reliable).
+2026-03-06 19:31:46,468 [AGENT] INFO ==================================================
+2026-03-06 19:31:46,468 [AGENT] INFO Running initial stats fetch...
+2026-03-06 19:31:46,470 [AGENT] INFO Scheduled: updating stats...
+2026-03-06 19:31:46,470 [AGENT] INFO Stats fetch scheduled every 6h
+2026-03-06 19:31:46,471 [AGENT] INFO Resume generation scheduled daily at 08:00
+2026-03-06 19:31:46,471 [AGENT] INFO Nightly report scheduled at 20:00
+2026-03-06 19:31:46,472 [AGENT] INFO Telegram bot thread started.
+2026-03-06 19:31:50,128 [AGENT] ERROR Telegram bot crashed: 'charmap' codec can't encode character '\u2713' in position 6: character maps to <undefined>
+2026-03-06 19:31:54,756 [AGENT] INFO Scheduler running (tick every 30s)...
+2026-03-06 19:31:54,758 [AGENT] INFO Scheduled: updating stats...
+2026-03-06 19:31:54,928 [AGENT] ERROR Stats update failed: 'charmap' codec can't encode character '\u2713' in position 9: character maps to <undefined>
+2026-03-06 19:31:57,363 [AGENT] ERROR Stats update failed: 'charmap' codec can't encode character '\u2713' in position 9: character maps to <undefined>
+2026-03-06 19:45:44,660 [AGENT] INFO ==================================================
+2026-03-06 19:45:44,661 [AGENT] INFO Career Agent starting up...
+2026-03-06 19:45:44,661 [AGENT] INFO Profile: Nagabhusi Gowtham Reddy
+2026-03-06 19:45:44,661 [AGENT] INFO Using Groq API for AI generation (Faster & more reliable).
+2026-03-06 19:45:44,661 [AGENT] INFO ==================================================
+2026-03-06 19:45:44,661 [AGENT] INFO Running initial stats fetch...
+2026-03-06 19:45:44,665 [AGENT] INFO Scheduled: updating stats...
+2026-03-06 19:45:44,665 [AGENT] INFO Stats fetch scheduled every 6h
+2026-03-06 19:45:44,666 [AGENT] INFO Resume generation scheduled daily at 08:00
+2026-03-06 19:45:44,666 [AGENT] INFO Nightly report scheduled at 20:00
+2026-03-06 19:45:44,667 [AGENT] INFO Telegram bot thread started.
+2026-03-06 19:45:48,556 [AGENT] ERROR Telegram bot crashed: 'charmap' codec can't encode character '\u2713' in position 6: character maps to <undefined>
+2026-03-06 19:45:49,149 [AGENT] ERROR Stats update failed: 'charmap' codec can't encode character '\u2713' in position 9: character maps to <undefined>
+2026-03-06 19:45:49,843 [AGENT] INFO Scheduler running (tick every 30s)...
+2026-03-06 19:45:49,844 [AGENT] INFO Scheduled: updating stats...
+2026-03-06 19:45:52,578 [AGENT] ERROR Stats update failed: 'charmap' codec can't encode character '\u2713' in position 9: character maps to <undefined>
+2026-03-06 20:00:19,869 [AGENT] INFO Scheduled: sending nightly report...
+2026-03-06 20:00:24,801 [AGENT] INFO Scheduled: sending nightly report...

@@ -1,0 +1,77 @@
+"""
+backend/api/resume.py — Resume generation and download endpoints
+"""
+
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
+from pathlib import Path
+import yaml
+
+from backend.services.resume_builder import build_docx
+from backend.database import models as db
+
+router = APIRouter(prefix="/api/resume", tags=["Resume"])
+
+CONFIG_PATH = Path(__file__).parent.parent.parent / "config.yaml"
+
+
+def _load_config() -> dict:
+    with open(CONFIG_PATH, encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+class GenerateRequest(BaseModel):
+    job_role: str = ""
+    job_description: str = ""
+
+
+@router.post("/generate")
+async def generate_resume(req: GenerateRequest):
+    """Generate a tailored DOCX resume using Ollama AI."""
+    try:
+        config = _load_config()
+        result = build_docx(config, job_role=req.job_role, job_description=req.job_description)
+        if "error" in result:
+            raise HTTPException(status_code=500, detail=result["error"])
+        return {
+            "success": True,
+            "resume_id": result["resume_id"],
+            "filename": result["filename"],
+            "download_url": f"/api/resume/download/{result['resume_id']}"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/list")
+async def list_resumes():
+    """List all previously generated resumes."""
+    try:
+        db.init_db()
+        resumes = db.get_resumes(limit=20)
+        return {"resumes": resumes}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/download/{resume_id}")
+async def download_resume(resume_id: int):
+    """Download a generated resume DOCX file."""
+    try:
+        resumes = db.get_resumes(limit=100)
+        resume = next((r for r in resumes if r["id"] == resume_id), None)
+        if not resume:
+            raise HTTPException(status_code=404, detail="Resume not found")
+        file_path = Path(resume["file_path"])
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail="Resume file no longer exists")
+        return FileResponse(
+            path=str(file_path),
+            filename=file_path.name,
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
