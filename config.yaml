@@ -3,15 +3,15 @@
 # ============================================================
 
 profile:
-  name: "Nagabhusi Gowtham Reddy"
-  email: "gowthamreddynagabhusi09@gmail.com"
-  phone: "+91-8317615143"
-  linkedin: "https://www.linkedin.com/in/gowthamreddynagabhusi/"
-  github_username: "GowthamReddyNagabhusi"
-  codeforces_handle: "gowthamreddynagabhusi09"
-  leetcode_username: "Gowtham_Reddy_09"
-  location: "Phagwara, Punjab"
-  role_target: "Backend Developer / SDE Intern"
+  name: ""
+  email: ""
+  phone: ""
+  linkedin: ""
+  github_username: ""
+  codeforces_handle: ""
+  leetcode_username: ""
+  location: ""
+  role_target: ""
 
 # ── Groq API (free cloud fallback — faster for quick tasks) ──
 # Get free key: https://console.groq.com/keys
