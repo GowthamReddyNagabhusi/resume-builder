@@ -1,8 +1,8 @@
-# Antigravity Career Agent
+# CareerForge
 
-> AI-powered career automation — resume builder, job tracker, GitHub import, cover letters. Built as a local-first Web SaaS using **FastAPI + Next.js + Groq AI**.
+> AI-powered developer career platform — profile-first onboarding, dynamic resume generation, job tracking, and AI writing with **FastAPI + Next.js + Groq**.
 
-![Dashboard](https://img.shields.io/badge/Status-v1.0-brightgreen) ![Python](https://img.shields.io/badge/Python-3.13-blue) ![Next.js](https://img.shields.io/badge/Next.js-16-black) ![License](https://img.shields.io/badge/License-MIT-purple)
+![Dashboard](https://img.shields.io/badge/Status-v2.0.0--stable-brightgreen) ![Python](https://img.shields.io/badge/Python-3.13-blue) ![Next.js](https://img.shields.io/badge/Next.js-16-black) ![License](https://img.shields.io/badge/License-MIT-purple)
 
 ---
 
@@ -21,11 +21,10 @@
 ## Tech Stack
 
 ```
-Frontend:  Next.js 16  (pages router, vanilla CSS, dark glassmorphism UI)
+Frontend:  Next.js 16  (pages router, modern professional UI)
 Backend:   FastAPI     (Python 3.13, async, Swagger UI at /docs)
 Database:  SQLite      (career.db — projects, resumes, jobs, stats)
 AI:        Groq Cloud  (llama-3.1-8b-instant — free tier, fast)
-           Ollama WSL  (optional local fallback — llama3 / mistral)
 Resume:    python-docx (DOCX output, A4 format, styled)
 ```
 
@@ -43,17 +42,23 @@ Resume:    python-docx (DOCX output, A4 format, styled)
 pip install fastapi uvicorn[standard] python-docx pyyaml requests
 ```
 
-### 3. Configure
-Edit `config.yaml` — add your Groq key:
-```yaml
-groq:
-  api_key: "gsk_your_key_here"
+### 3. Configure (Secure)
+Do not put secrets in `config.yaml`.
 
-profile:
-  github_username: "YourGitHubUsername"
-  codeforces_handle: "your_cf_handle"
-  leetcode_username: "your_lc_username"
+Create `.env` from `.env.example`:
+```bash
+copy .env.example .env
 ```
+
+Set these values in `.env`:
+```env
+GROQ_API_KEY=your_real_groq_key
+JWT_SECRET=use_a_long_random_secret
+JWT_ALGORITHM=HS256
+JWT_EXP_MINUTES=120
+```
+
+Profile defaults can still be configured in `config.yaml`.
 
 ### 4. Install Frontend
 ```bash
@@ -83,12 +88,12 @@ start_frontend.bat         # Windows
 ## Project Structure
 
 ```
-antigravity/
+careerforge/
 ├── backend/
 │   ├── main.py                   # FastAPI entry point
 │   ├── database/models.py        # SQLite schema & queries
 │   ├── services/
-│   │   ├── ai_engine.py          # Groq AI wrapper (+ Ollama fallback)
+│   │   ├── ai_engine.py          # Groq AI wrapper
 │   │   ├── github_parser.py      # GitHub / Codeforces / LeetCode APIs
 │   │   └── resume_builder.py     # Smart project picker + DOCX builder
 │   └── api/
@@ -115,11 +120,8 @@ antigravity/
 ```
 Request
   │
-  ├─► Groq Cloud (primary)   — llama-3.1-8b-instant, free 30 RPM
-  └─► Ollama WSL (fallback)  — llama3/mistral, runs locally
+  └─► Groq Cloud — llama-3.1-8b-instant, free tier
 ```
-
-No key? Run `ollama serve` in WSL and it works without Groq too.
 
 ---
 
@@ -146,6 +148,26 @@ Then picks **2–3 best projects** with language diversity (max 2 same language)
 - [ ] PDF export
 - [ ] Docker deploy
 - [ ] Portfolio website auto-generator
+
+---
+
+## New Career Platform APIs
+
+The platform now supports a multi-user career profile workflow:
+
+- `POST /api/auth/signup`
+- `POST /api/auth/login`
+- `GET /api/auth/me`
+- `POST /api/auth/logout`
+- `POST /api/profile/setup` (career setup wizard)
+- `GET /api/profile/me`
+- `POST /api/templates/upload`
+- `GET /api/templates`
+- `POST /api/dynamic-resume/generate`
+- `GET /api/dynamic-resume/history`
+- `GET /api/dynamic-resume/download/{id}`
+- `POST /api/platforms/sync`
+- `POST /api/ai/improve-bullet`
 
 ---
 

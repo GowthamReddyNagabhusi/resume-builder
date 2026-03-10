@@ -1,5 +1,5 @@
 """
-backend/database/models.py — SQLite layer for Antigravity Career Agent
+backend/database/models.py — SQLite layer for CareerForge
 Upgraded schema with users, projects, resumes, applications, stats
 """
 import sqlite3
@@ -20,6 +20,192 @@ def get_conn():
 def init_db():
     conn = get_conn()
     c = conn.cursor()
+
+    c.execute("PRAGMA foreign_keys = ON")
+
+    # Users/auth
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            name          TEXT NOT NULL,
+            email         TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            created_at    TEXT NOT NULL
+        )
+    """)
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS user_sessions (
+            jti          TEXT PRIMARY KEY,
+            user_id      INTEGER NOT NULL,
+            expires_at   TEXT NOT NULL,
+            revoked      INTEGER DEFAULT 0,
+            created_at   TEXT NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS profiles (
+            id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id             INTEGER UNIQUE NOT NULL,
+            full_name           TEXT,
+            email               TEXT,
+            phone               TEXT,
+            location            TEXT,
+            linkedin            TEXT,
+            portfolio           TEXT,
+            github_profile      TEXT,
+            setup_completed     INTEGER DEFAULT 0,
+            created_at          TEXT NOT NULL,
+            updated_at          TEXT NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS education (
+            id           INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id      INTEGER NOT NULL,
+            university   TEXT,
+            degree       TEXT,
+            branch       TEXT,
+            cgpa         TEXT,
+            start_year   INTEGER,
+            end_year     INTEGER,
+            created_at   TEXT NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS coding_platforms (
+            id             INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id        INTEGER NOT NULL,
+            platform_name  TEXT NOT NULL,
+            username       TEXT,
+            profile_link   TEXT,
+            fetched_data   TEXT,
+            last_synced_at TEXT,
+            created_at     TEXT NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS github_data (
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id       INTEGER UNIQUE NOT NULL,
+            profile_link  TEXT,
+            repositories  INTEGER DEFAULT 0,
+            stars         INTEGER DEFAULT 0,
+            languages     TEXT,
+            projects      TEXT,
+            contributions INTEGER DEFAULT 0,
+            raw_data      TEXT,
+            fetched_at    TEXT,
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS profile_projects (
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id       INTEGER NOT NULL,
+            source        TEXT DEFAULT 'manual',
+            title         TEXT NOT NULL,
+            description   TEXT,
+            tech_stack    TEXT,
+            github_link   TEXT,
+            live_link     TEXT,
+            created_at    TEXT NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS internships (
+            id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id            INTEGER NOT NULL,
+            company            TEXT,
+            role               TEXT,
+            start_date         TEXT,
+            end_date           TEXT,
+            description        TEXT,
+            technologies_used  TEXT,
+            created_at         TEXT NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS certifications (
+            id               INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id          INTEGER NOT NULL,
+            certificate_name TEXT,
+            provider         TEXT,
+            certificate_link TEXT,
+            issue_date       TEXT,
+            created_at       TEXT NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS training (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id         INTEGER NOT NULL,
+            course_name     TEXT,
+            institution     TEXT,
+            skills_learned  TEXT,
+            duration        TEXT,
+            created_at      TEXT NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS resume_templates (
+            template_id    INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id        INTEGER NOT NULL,
+            template_name  TEXT NOT NULL,
+            template_file  TEXT NOT NULL,
+            template_type  TEXT NOT NULL,
+            created_at     TEXT NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS resume_configs (
+            id                    INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id               INTEGER NOT NULL,
+            template_id           INTEGER,
+            selected_projects     TEXT,
+            selected_skills       TEXT,
+            selected_experience   TEXT,
+            selected_platforms    TEXT,
+            target_role           TEXT,
+            created_at            TEXT NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY(template_id) REFERENCES resume_templates(template_id) ON DELETE SET NULL
+        )
+    """)
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS generated_resumes (
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id       INTEGER NOT NULL,
+            config_id     INTEGER,
+            template_id   INTEGER,
+            file_path     TEXT NOT NULL,
+            file_type     TEXT NOT NULL,
+            created_at    TEXT NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY(config_id) REFERENCES resume_configs(id) ON DELETE SET NULL,
+            FOREIGN KEY(template_id) REFERENCES resume_templates(template_id) ON DELETE SET NULL
+        )
+    """)
 
     # Stats snapshots (GitHub / Codeforces / LeetCode)
     c.execute("""
@@ -295,3 +481,275 @@ def get_experience():
     rows = conn.execute("SELECT entry FROM manual_experience ORDER BY added_at DESC").fetchall()
     conn.close()
     return [r["entry"] for r in rows]
+
+
+# ── Auth and users ─────────────────────────────────────────
+
+def create_user(name: str, email: str, password_hash: str) -> int:
+    conn = get_conn()
+    now = datetime.now().isoformat()
+    cur = conn.execute(
+        "INSERT INTO users (name, email, password_hash, created_at) VALUES (?,?,?,?)",
+        (name.strip(), email.strip().lower(), password_hash, now),
+    )
+    conn.commit()
+    user_id = cur.lastrowid
+    conn.close()
+    return user_id
+
+
+def get_user_by_email(email: str):
+    conn = get_conn()
+    row = conn.execute("SELECT * FROM users WHERE email=?", (email.strip().lower(),)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def get_user_by_id(user_id: int):
+    conn = get_conn()
+    row = conn.execute("SELECT id, name, email, created_at FROM users WHERE id=?", (user_id,)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def save_session(jti: str, user_id: int, expires_at: str):
+    conn = get_conn()
+    conn.execute(
+        "INSERT OR REPLACE INTO user_sessions (jti, user_id, expires_at, revoked, created_at) VALUES (?,?,?,?,?)",
+        (jti, user_id, expires_at, 0, datetime.now().isoformat()),
+    )
+    conn.commit()
+    conn.close()
+
+
+def revoke_session(jti: str):
+    conn = get_conn()
+    conn.execute("UPDATE user_sessions SET revoked=1 WHERE jti=?", (jti,))
+    conn.commit()
+    conn.close()
+
+
+def is_session_revoked(jti: str) -> bool:
+    conn = get_conn()
+    row = conn.execute("SELECT revoked FROM user_sessions WHERE jti=?", (jti,)).fetchone()
+    conn.close()
+    if not row:
+        return True
+    return bool(row["revoked"])
+
+
+# ── Setup wizard/profile storage ───────────────────────────
+
+def upsert_profile(user_id: int, payload: dict):
+    conn = get_conn()
+    now = datetime.now().isoformat()
+    conn.execute(
+        """
+        INSERT INTO profiles (
+            user_id, full_name, email, phone, location, linkedin, portfolio, github_profile,
+            setup_completed, created_at, updated_at
+        ) VALUES (?,?,?,?,?,?,?,?,?,?,?)
+        ON CONFLICT(user_id) DO UPDATE SET
+            full_name=excluded.full_name,
+            email=excluded.email,
+            phone=excluded.phone,
+            location=excluded.location,
+            linkedin=excluded.linkedin,
+            portfolio=excluded.portfolio,
+            github_profile=excluded.github_profile,
+            setup_completed=excluded.setup_completed,
+            updated_at=excluded.updated_at
+        """,
+        (
+            user_id,
+            payload.get("full_name", ""),
+            payload.get("email", ""),
+            payload.get("phone", ""),
+            payload.get("location", ""),
+            payload.get("linkedin", ""),
+            payload.get("portfolio", ""),
+            payload.get("github_profile", ""),
+            1 if payload.get("setup_completed") else 0,
+            now,
+            now,
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+
+def replace_rows(user_id: int, table: str, rows: list[dict]):
+    allowed = {
+        "education": ["university", "degree", "branch", "cgpa", "start_year", "end_year"],
+        "coding_platforms": ["platform_name", "username", "profile_link"],
+        "profile_projects": ["source", "title", "description", "tech_stack", "github_link", "live_link"],
+        "internships": ["company", "role", "start_date", "end_date", "description", "technologies_used"],
+        "certifications": ["certificate_name", "provider", "certificate_link", "issue_date"],
+        "training": ["course_name", "institution", "skills_learned", "duration"],
+    }
+    if table not in allowed:
+        raise ValueError("Invalid table")
+
+    conn = get_conn()
+    conn.execute(f"DELETE FROM {table} WHERE user_id=?", (user_id,))
+    now = datetime.now().isoformat()
+    cols = allowed[table]
+    placeholders = ",".join(["?"] * (len(cols) + 2))
+    col_sql = ", ".join(["user_id"] + cols + ["created_at"])
+    for row in rows or []:
+        values = [user_id] + [row.get(c) for c in cols] + [now]
+        conn.execute(f"INSERT INTO {table} ({col_sql}) VALUES ({placeholders})", values)
+    conn.commit()
+    conn.close()
+
+
+def get_profile_bundle(user_id: int) -> dict:
+    conn = get_conn()
+    profile = conn.execute("SELECT * FROM profiles WHERE user_id=?", (user_id,)).fetchone()
+    edu = conn.execute("SELECT * FROM education WHERE user_id=? ORDER BY id DESC", (user_id,)).fetchall()
+    platforms = conn.execute("SELECT * FROM coding_platforms WHERE user_id=? ORDER BY id DESC", (user_id,)).fetchall()
+    projects = conn.execute("SELECT * FROM profile_projects WHERE user_id=? ORDER BY id DESC", (user_id,)).fetchall()
+    internships = conn.execute("SELECT * FROM internships WHERE user_id=? ORDER BY id DESC", (user_id,)).fetchall()
+    certs = conn.execute("SELECT * FROM certifications WHERE user_id=? ORDER BY id DESC", (user_id,)).fetchall()
+    training = conn.execute("SELECT * FROM training WHERE user_id=? ORDER BY id DESC", (user_id,)).fetchall()
+    github = conn.execute("SELECT * FROM github_data WHERE user_id=?", (user_id,)).fetchone()
+    conn.close()
+    return {
+        "profile": dict(profile) if profile else None,
+        "education": [dict(r) for r in edu],
+        "coding_platforms": [dict(r) for r in platforms],
+        "projects": [dict(r) for r in projects],
+        "internships": [dict(r) for r in internships],
+        "certifications": [dict(r) for r in certs],
+        "training": [dict(r) for r in training],
+        "github_data": dict(github) if github else None,
+    }
+
+
+def upsert_github_data(user_id: int, payload: dict):
+    conn = get_conn()
+    conn.execute(
+        """
+        INSERT INTO github_data (
+            user_id, profile_link, repositories, stars, languages, projects, contributions, raw_data, fetched_at
+        ) VALUES (?,?,?,?,?,?,?,?,?)
+        ON CONFLICT(user_id) DO UPDATE SET
+            profile_link=excluded.profile_link,
+            repositories=excluded.repositories,
+            stars=excluded.stars,
+            languages=excluded.languages,
+            projects=excluded.projects,
+            contributions=excluded.contributions,
+            raw_data=excluded.raw_data,
+            fetched_at=excluded.fetched_at
+        """,
+        (
+            user_id,
+            payload.get("profile_link", ""),
+            payload.get("repositories", 0),
+            payload.get("stars", 0),
+            json.dumps(payload.get("languages", [])),
+            json.dumps(payload.get("projects", [])),
+            payload.get("contributions", 0),
+            json.dumps(payload),
+            datetime.now().isoformat(),
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+
+def mark_setup_completed(user_id: int):
+    conn = get_conn()
+    conn.execute("UPDATE profiles SET setup_completed=1, updated_at=? WHERE user_id=?", (datetime.now().isoformat(), user_id))
+    conn.commit()
+    conn.close()
+
+
+# ── Templates and dynamic resumes ──────────────────────────
+
+def create_template(user_id: int, template_name: str, template_file: str, template_type: str) -> int:
+    conn = get_conn()
+    cur = conn.execute(
+        "INSERT INTO resume_templates (user_id, template_name, template_file, template_type, created_at) VALUES (?,?,?,?,?)",
+        (user_id, template_name, template_file, template_type, datetime.now().isoformat()),
+    )
+    conn.commit()
+    template_id = cur.lastrowid
+    conn.close()
+    return template_id
+
+
+def list_templates(user_id: int) -> list[dict]:
+    conn = get_conn()
+    rows = conn.execute(
+        "SELECT template_id, template_name, template_file, template_type, created_at FROM resume_templates WHERE user_id=? ORDER BY created_at DESC",
+        (user_id,),
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def create_resume_config(user_id: int, payload: dict) -> int:
+    conn = get_conn()
+    cur = conn.execute(
+        """
+        INSERT INTO resume_configs (
+            user_id, template_id, selected_projects, selected_skills,
+            selected_experience, selected_platforms, target_role, created_at
+        ) VALUES (?,?,?,?,?,?,?,?)
+        """,
+        (
+            user_id,
+            payload.get("template_id"),
+            json.dumps(payload.get("selected_projects", [])),
+            json.dumps(payload.get("selected_skills", [])),
+            json.dumps(payload.get("selected_experience", [])),
+            json.dumps(payload.get("selected_platforms", [])),
+            payload.get("target_role", ""),
+            datetime.now().isoformat(),
+        ),
+    )
+    conn.commit()
+    config_id = cur.lastrowid
+    conn.close()
+    return config_id
+
+
+def log_generated_resume(user_id: int, config_id: int | None, template_id: int | None, file_path: str, file_type: str) -> int:
+    conn = get_conn()
+    cur = conn.execute(
+        "INSERT INTO generated_resumes (user_id, config_id, template_id, file_path, file_type, created_at) VALUES (?,?,?,?,?,?)",
+        (user_id, config_id, template_id, file_path, file_type, datetime.now().isoformat()),
+    )
+    conn.commit()
+    rid = cur.lastrowid
+    conn.close()
+    return rid
+
+
+def list_generated_resumes(user_id: int) -> list[dict]:
+    conn = get_conn()
+    rows = conn.execute(
+        "SELECT id, config_id, template_id, file_path, file_type, created_at FROM generated_resumes WHERE user_id=? ORDER BY created_at DESC",
+        (user_id,),
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def get_generated_resume(user_id: int, resume_id: int):
+    conn = get_conn()
+    row = conn.execute(
+        "SELECT * FROM generated_resumes WHERE user_id=? AND id=?",
+        (user_id, resume_id),
+    ).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def list_user_ids() -> list[int]:
+    conn = get_conn()
+    rows = conn.execute("SELECT id FROM users ORDER BY id ASC").fetchall()
+    conn.close()
+    return [int(r["id"]) for r in rows]

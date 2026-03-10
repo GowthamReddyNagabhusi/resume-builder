@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+python-docx
+pyyaml
+requests
+PyJWT
+python-multipart
+pydantic[email]
+reportlab

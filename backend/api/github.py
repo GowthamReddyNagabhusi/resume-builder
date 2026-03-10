@@ -4,20 +4,15 @@ backend/api/github.py — GitHub import and project management endpoints
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from pathlib import Path
-import yaml
 
 from backend.services.github_parser import fetch_github
 from backend.database import models as db
+from backend.core.settings import get_settings
 
 router = APIRouter(prefix="/api/github", tags=["GitHub"])
 
-CONFIG_PATH = Path(__file__).parent.parent.parent / "config.yaml"
-
-
 def _load_config() -> dict:
-    with open(CONFIG_PATH, encoding="utf-8") as f:
-        return yaml.safe_load(f)
+    return get_settings()
 
 
 class ToggleRequest(BaseModel):

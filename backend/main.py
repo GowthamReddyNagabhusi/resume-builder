@@ -1,5 +1,5 @@
 """
-backend/main.py — Antigravity Career Agent FastAPI Server
+backend/main.py — CareerForge FastAPI Server
 Run with: uvicorn backend.main:app --reload --port 8000
 """
 
@@ -8,11 +8,22 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
-from backend.api import resume, ai, github, jobs, stats
+from backend.api import (
+    resume,
+    ai,
+    github,
+    jobs,
+    stats,
+    auth,
+    profile,
+    templates,
+    dynamic_resume,
+    platforms,
+)
 from backend.database import models as db
 
 app = FastAPI(
-    title="Antigravity Career Agent",
+    title="CareerForge",
     description="AI-powered career automation: resumes, job tracking, GitHub import",
     version="2.0.0"
 )
@@ -32,24 +43,33 @@ app.include_router(ai.router)
 app.include_router(github.router)
 app.include_router(jobs.router)
 app.include_router(stats.router)
+app.include_router(auth.router)
+app.include_router(profile.router)
+app.include_router(templates.router)
+app.include_router(dynamic_resume.router)
+app.include_router(platforms.router)
 
 
 @app.on_event("startup")
 async def startup():
     """Initialize database on startup."""
     db.init_db()
-    print("[Antigravity] Backend running at http://localhost:8000")
-    print("[Antigravity] API Docs: http://localhost:8000/docs")
+    print("[CareerForge] Backend running at http://localhost:8000")
+    print("[CareerForge] API Docs: http://localhost:8000/docs")
 
 
 @app.get("/")
 async def root():
     return {
-        "app": "Antigravity Career Agent",
+        "app": "CareerForge",
         "version": "2.0.0",
         "status": "running",
         "docs": "/docs",
         "endpoints": {
+            "auth":   "/api/auth",
+            "profile": "/api/profile",
+            "templates": "/api/templates",
+            "dynamic_resume": "/api/dynamic-resume",
             "stats":  "/api/stats",
             "resume": "/api/resume",
             "github": "/api/github",

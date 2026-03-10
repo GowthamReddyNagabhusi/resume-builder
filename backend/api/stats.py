@@ -3,20 +3,15 @@ backend/api/stats.py — Stats snapshots and refresh endpoints
 """
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks
-from pathlib import Path
-import yaml
 
 from backend.services.github_parser import update_all_stats
 from backend.database import models as db
+from backend.core.settings import get_settings
 
 router = APIRouter(prefix="/api/stats", tags=["Stats"])
 
-CONFIG_PATH = Path(__file__).parent.parent.parent / "config.yaml"
-
-
 def _load_config() -> dict:
-    with open(CONFIG_PATH, encoding="utf-8") as f:
-        return yaml.safe_load(f)
+    return get_settings()
 
 
 @router.get("")

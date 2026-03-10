@@ -1,7 +1,6 @@
 """
 backend/services/ai_engine.py
-Groq-powered AI engine — free cloud inference, no local GPU needed.
-Ollama remains as optional local fallback if running.
+Groq-powered AI engine.
 """
 
 import json
@@ -9,7 +8,6 @@ import requests
 
 GROQ_URL  = "https://api.groq.com/openai/v1/chat/completions"
 GROQ_MODEL = "llama-3.1-8b-instant"   # free tier, fast
-OLLAMA_HOST = "http://localhost:11434"  # optional, WSL
 
 
 # ── Groq (primary) ─────────────────────────────────────────
@@ -42,67 +40,34 @@ def _call_groq(api_key: str, prompt: str, max_tokens: int = 1024) -> str | None:
     return None
 
 
-# ── Ollama (optional local fallback) ───────────────────────
-
-def _call_ollama(prompt: str, model: str = "llama3") -> str | None:
-    try:
-        r = requests.post(
-            f"{OLLAMA_HOST}/api/generate",
-            json={"model": model, "prompt": prompt, "stream": False},
-            timeout=120,
-        )
-        r.raise_for_status()
-        return r.json().get("response", "").strip()
-    except Exception:
-        return None
-
-
 # ── Main generate ───────────────────────────────────────────
 
 def generate(prompt: str, config: dict = None, max_tokens: int = 1024) -> str:
     """
-    Generate text using Groq (primary) or Ollama (local fallback).
-    Returns empty string if both fail.
+    Generate text using Groq.
+    Returns empty string if the provider is unavailable.
     """
     cfg = config or {}
     groq_key = cfg.get("groq", {}).get("api_key", "")
 
-    # 1. Groq (primary — free cloud)
+    # Groq provider
     result = _call_groq(groq_key, prompt, max_tokens)
     if result:
         return result
 
-    # 2. Ollama (optional local — if running in WSL)
-    ollama_model = cfg.get("ollama", {}).get("model", "llama3")
-    result = _call_ollama(prompt, model=ollama_model)
-    if result:
-        return result
-
-    print("[AI] Both Groq and Ollama unavailable. Check your Groq API key.")
+    print("[AI] Groq unavailable. Check your GROQ_API_KEY configuration.")
     return ""
 
 
 def check_ai_status(config: dict = None) -> dict:
-    """Return AI provider availability."""
+    """Return Groq provider availability."""
     cfg = config or {}
     groq_key = cfg.get("groq", {}).get("api_key", "")
     groq_ok = bool(groq_key and not groq_key.startswith("PASTE"))
 
-    # Quick Ollama ping
-    ollama_online = False
-    ollama_models = []
-    try:
-        r = requests.get(f"{OLLAMA_HOST}/api/tags", timeout=3)
-        if r.ok:
-            ollama_online = True
-            ollama_models = [m["name"] for m in r.json().get("models", [])]
-    except Exception:
-        pass
-
     return {
         "groq": {"available": groq_ok, "model": GROQ_MODEL},
-        "ollama": {"online": ollama_online, "models": ollama_models},
-        "primary": "groq" if groq_ok else ("ollama" if ollama_online else "none"),
+        "primary": "groq" if groq_ok else "none",
     }
 
 

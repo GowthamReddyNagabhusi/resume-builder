@@ -11,6 +11,7 @@ build/
 # Database & logs
 data/career.db
 data/*.log
+data/templates/
 
 # Resume outputs (generated files)
 resume/*.docx

@@ -1,8 +1,8 @@
 @echo off
-title Antigravity Frontend
+title CareerForge Frontend
 echo.
 echo  =============================================
-echo   ANTIGRAVITY CAREER AGENT — Frontend
+echo   CAREERFORGE — Frontend
 echo  =============================================
 echo.
 echo  Starting Next.js on http://localhost:3000

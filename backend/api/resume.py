@@ -6,19 +6,15 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from pathlib import Path
-import yaml
 
 from backend.services.resume_builder import build_docx
 from backend.database import models as db
+from backend.core.settings import get_settings
 
 router = APIRouter(prefix="/api/resume", tags=["Resume"])
 
-CONFIG_PATH = Path(__file__).parent.parent.parent / "config.yaml"
-
-
 def _load_config() -> dict:
-    with open(CONFIG_PATH, encoding="utf-8") as f:
-        return yaml.safe_load(f)
+    return get_settings()
 
 
 class GenerateRequest(BaseModel):
@@ -28,7 +24,7 @@ class GenerateRequest(BaseModel):
 
 @router.post("/generate")
 async def generate_resume(req: GenerateRequest):
-    """Generate a tailored DOCX resume using Ollama AI."""
+    """Generate a tailored DOCX resume using Groq AI."""
     try:
         config = _load_config()
         result = build_docx(config, job_role=req.job_role, job_description=req.job_description)

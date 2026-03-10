@@ -1,5 +1,5 @@
 # ============================================================
-#  ANTIGRAVITY CAREER AGENT — config.yaml
+#  CAREERFORGE — config.yaml
 # ============================================================
 
 profile:
@@ -13,18 +13,14 @@ profile:
   location: "Phagwara, Punjab"
   role_target: "Backend Developer / SDE Intern"
 
-# ── Ollama (local AI — completely free, runs in WSL) ─────────
-# Make sure Ollama is running: wsl ollama serve
-# Pull models: wsl ollama pull llama3
-ollama:
-  host: "http://localhost:11434"
-  model: "llama3"             # primary model
-  fallback_model: "mistral"   # used if llama3 unavailable
-
 # ── Groq API (free cloud fallback — faster for quick tasks) ──
 # Get free key: https://console.groq.com/keys
 groq:
   api_key: ""
+
+auth:
+  jwt_algorithm: "HS256"
+  jwt_exp_minutes: 120
 
 schedule:
   stats_interval_hours: 6
@@ -36,7 +32,7 @@ resume:
 skills:
   languages:       ["C++", "Java", "C", "Python"]
   frameworks:      ["HTML", "CSS", "JavaScript", "FastAPI", "Next.js"]
-  tools:           ["AWS", "Git", "GitHub", "Maven", "Docker", "Ollama"]
+  tools:           ["AWS", "Git", "GitHub", "Maven", "Docker", "Groq"]
   cs_fundamentals: ["Data Structures & Algorithms (DSA)", "Object-Oriented Programming", "Algorithmic Optimization"]
   soft_skills:     ["Problem-Solving", "Analytical Thinking", "Quick Learning", "Adaptability"]
 

@@ -1,8 +1,8 @@
 @echo off
-title Antigravity Backend
+title CareerForge Backend
 echo.
 echo  =============================================
-echo   ANTIGRAVITY CAREER AGENT — Backend Server
+echo   CAREERFORGE — Backend Server
 echo  =============================================
 echo.
 echo  Starting FastAPI on http://localhost:8000

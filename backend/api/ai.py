@@ -1,25 +1,20 @@
 """
-backend/api/ai.py — AI generation endpoints (Ollama + Groq)
+backend/api/ai.py — AI generation endpoints (Groq)
 """
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from pathlib import Path
-import yaml
 
 from backend.services.ai_engine import (
     generate, generate_cover_letter,
     suggest_resume_improvements, check_ai_status
 )
+from backend.core.settings import get_settings
 
 router = APIRouter(prefix="/api/ai", tags=["AI"])
 
-CONFIG_PATH = Path(__file__).parent.parent.parent / "config.yaml"
-
-
 def _load_config() -> dict:
-    with open(CONFIG_PATH, encoding="utf-8") as f:
-        return yaml.safe_load(f)
+    return get_settings()
 
 
 class GenerateRequest(BaseModel):
@@ -38,9 +33,14 @@ class ImproveRequest(BaseModel):
     job_description: str
 
 
+class ImproveBulletRequest(BaseModel):
+    bullet: str
+    target_role: str = ""
+
+
 @router.get("/status")
 async def ai_status():
-    """Check AI provider availability (Groq primary + optional Ollama)."""
+    """Check AI provider availability."""
     config = _load_config()
     return check_ai_status(config)
 
@@ -89,5 +89,23 @@ async def ai_improve(req: ImproveRequest):
             config=config
         )
         return {"suggestions": suggestions, "success": bool(suggestions)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/improve-bullet")
+async def ai_improve_bullet(req: ImproveBulletRequest):
+    """Improve a single resume bullet with stronger, measurable phrasing."""
+    try:
+        config = _load_config()
+        prompt = (
+            "Rewrite this resume bullet to be more technical and impact-driven. "
+            "Keep it to one sentence under 30 words. "
+            "Use strong action verbs and include measurable impact when possible.\n\n"
+            f"Target Role: {req.target_role or 'Software Engineer'}\n"
+            f"Bullet: {req.bullet}"
+        )
+        improved = generate(prompt, config=config, max_tokens=120)
+        return {"original": req.bullet, "improved": improved or req.bullet, "success": True}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
