@@ -30,23 +30,26 @@
 
 **Backend**:
 - **Framework**: FastAPI (Python async framework)
-- **Database**: PostgreSQL
-- **ORM**: SQLAlchemy
-- **AI Integration**: OpenAI/Anthropic APIs with modular fallbacks
-- **Caching**: Redis
-- **Authentication**: JWT + OAuth2
+- **Database**: SQLite (local), PostgreSQL-ready for production
+- **ORM**: SQLAlchemy ORM with raw SQL support
+- **AI Integration**: Groq API (free, fast), OpenAI/Anthropic fallbacks
+- **Authentication**: JWT tokens with refresh support
+- **Rate Limiting**: Token-bucket based
+- **Logging**: Structured JSON logging
 
 **Frontend**:
-- **Framework**: Next.js (React)
-- **Styling**: Tailwind CSS
-- **State Management**: Zustand/React Context
-- **HTTP Client**: Axios
+- **Framework**: Next.js 16+ (React 18)
+- **Styling**: Tailwind CSS with @tailwindcss/forms
+- **State Management**: React Context API
+- **HTTP Client**: Fetch API with custom client
+- **Form Handling**: React Hook Form
+- **Auth Context**: Custom AuthContext provider
 
 **Infrastructure**:
 - **Containerization**: Docker
-- **Orchestration**: Docker Compose (dev), Kubernetes (production)
-- **CI/CD**: GitHub Actions
-- **Cloud**: AWS/Azure ready
+- **Deployment**: Docker Compose or standalone
+- **CI/CD**: GitHub Actions ready
+- **Cloud**: AWS/Azure compatible
 
 ### Architecture Diagram
 
@@ -82,50 +85,53 @@ For detailed architecture, see [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md
 
 ### Prerequisites
 
-- Docker & Docker Compose
+- Python 3.11+ (for local development)
+- Node.js 18+ (for frontend)
 - Git
-- Python 3.11+ (for local development without Docker)
-- Node.js 18+ (for frontend development)
+- Windows/Mac/Linux
 
 ### Local Development (Recommended)
 
-**Using Docker** (simplest):
+**Quickest Setup**:
 
 ```bash
 # Clone repository
 git clone https://github.com/yourusername/resume-builder.git
 cd resume-builder
 
-# Run setup script
-./scripts/setup.sh  # Linux/Mac
-# or
-.\scripts\setup.bat  # Windows
+# Windows: Run startup scripts
+./start_backend.bat     # Terminal 1
+./start_frontend.bat    # Terminal 2
 
-# Navigate to http://localhost:3000
+# Linux/Mac:
+python -m uvicorn backend.main:app --reload --port 8000  # Terminal 1
+cd frontend && npm run dev                                # Terminal 2
 ```
 
-**Without Docker**:
-
-See [Local Setup Guide](./docs/setup/LOCAL_SETUP.md)
-
-### Common Commands
+**With Docker**:
 
 ```bash
-# Start services
 docker-compose up -d
+```
 
-# View logs
-docker-compose logs -f backend
-docker-compose logs -f frontend
+### Access the Application
 
-# Stop services
-docker-compose down
+| Service | URL | Purpose |
+|---------|-----|---------|
+| Frontend | http://localhost:3000 | User interface |
+| Backend API | http://localhost:8000 | REST API |
+| API Docs | http://localhost:8000/docs | Interactive Swagger UI |
+| Database | `data/career.db` | SQLite database |
 
-# Access services
-API: http://localhost:8000
-API Docs: http://localhost:8000/docs
-Frontend: http://localhost:3000
-Database Admin: http://localhost:5050
+### Environment Setup
+
+```bash
+# Create .env file (copy from .env.example)
+cp .env.example .env
+
+# Required variables:
+# JWT_SECRET - Generate: python -c "import secrets; print(secrets.token_hex(32))"
+# GROQ_API_KEY - Get free key at https://console.groq.com
 ```
 
 ---
@@ -137,29 +143,56 @@ The API is fully documented with interactive Swagger UI:
 **Swagger UI**: http://localhost:8000/docs
 **ReDoc**: http://localhost:8000/redoc
 
+### Main Endpoints
+
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| `POST` | `/api/auth/signup` | Register new user |
+| `POST` | `/api/auth/login` | User login |
+| `POST` | `/api/auth/refresh` | Refresh JWT token |
+| `GET` | `/api/auth/me` | Get current user |
+| `POST` | `/api/resume/generate` | Generate AI resume |
+| `GET` | `/api/resume/list` | List saved resumes |
+| `GET` | `/api/jobs` | Get job applications |
+| `POST` | `/api/jobs` | Add job application |
+| `GET` | `/api/ai/generate` | AI content generation |
+| `GET` | `/api/github/user` | GitHub profile import |
+| `GET` | `/api/stats` | User statistics |
+
 ### Example API Calls
+
+**User Signup**:
+
+```bash
+curl -X POST http://localhost:8000/api/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "SecurePass123",
+    "name": "John Doe"
+  }'
+```
 
 **Generate Resume**:
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/resumes/generate \
-  -H "Authorization: Bearer YOUR_TOKEN" \
+curl -X POST http://localhost:8000/api/resume/generate \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "job_description": "We are looking for a Python developer...",
-    "template_id": "modern",
-    "title": "Software Engineer - XYZ Company"
+    "job_role": "Senior Software Engineer",
+    "job_description": "We seek an experienced Python/Go developer..."
   }'
 ```
 
-**Get Career Data**:
+**Get User Profile**:
 
 ```bash
-curl http://localhost:8000/api/v1/career/summary \
-  -H "Authorization: Bearer YOUR_TOKEN"
+curl http://localhost:8000/api/auth/me \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
-See API documentation for complete endpoint reference.
+See [API Documentation](./docs/API.md) for complete endpoint reference.
 
 ---
 
@@ -169,50 +202,89 @@ See API documentation for complete endpoint reference.
 
 ```
 resume-builder/
-├── backend/              # FastAPI backend
-│   ├── app/
-│   │   ├── api/         # API endpoint handlers
-│   │   ├── ai/          # AI pipeline modules
-│   │   ├── services/    # Business logic layer
-│   │   ├── database/    # Database models
-│   │   └── core/        # Configuration, exceptions, security
-│   ├── requirements.txt
-│   └── tests/
-├── frontend/            # Next.js frontend
+├── backend/                   # FastAPI backend
+│   ├── api/                   # API endpoints
+│   │   ├── auth.py
+│   │   ├── resume.py
+│   │   ├── jobs.py
+│   │   ├── ai.py
+│   │   ├── github.py
+│   │   ├── profile.py
+│   │   ├── stats.py
+│   │   ├── templates.py
+│   │   ├── dynamic_resume.py
+│   │   └── platforms.py
+│   ├── services/              # Business logic
+│   │   ├── resume_builder.py
+│   │   ├── ai_engine.py
+│   │   ├── github_parser.py
+│   │   └── platform_sync.py
+│   ├── core/                  # Core modules
+│   │   ├── security.py        # JWT, encryption
+│   │   ├── settings.py        # Configuration
+│   │   ├── deps.py            # Dependencies
+│   │   ├── logger.py          # Logging
+│   │   ├── rate_limit.py      # Rate limiting
+│   │   └── exceptions.py      # Error handling
+│   ├── database/              # Data layer
+│   │   └── models.py          # SQLite models
+│   ├── main.py                # Application entry
+│   └── requirements.txt
+├── frontend/                  # Next.js frontend
 │   ├── src/
-│   │   ├── pages/       # Page components
-│   │   ├── components/  # Reusable components
-│   │   ├── lib/         # Utilities and API client
-│   │   └── styles/      # CSS
+│   │   ├── pages/             # Page components
+│   │   │   ├── auth/
+│   │   │   ├── resume/
+│   │   │   ├── career/
+│   │   │   └── dashboard.js
+│   │   ├── components/        # Reusable components
+│   │   ├── lib/               # Utilities
+│   │   │   ├── api/
+│   │   │   ├── context/
+│   │   │   └── utils/
+│   │   ├── hooks/             # React hooks
+│   │   └── styles/            # CSS
 │   ├── package.json
 │   └── public/
-├── infra/              # Infrastructure configuration
-│   ├── docker/         # Dockerfiles
-│   ├── kubernetes/     # K8s manifests
-│   └── terraform/      # IaC templates
-├── docs/               # Documentation
-├── docker-compose.yml  # Local development
+├── infra/                     # Infrastructure
+│   ├── docker/                # Docker configs
+│   └── kubernetes/            # K8s manifests
+├── docs/                      # Documentation
+│   ├── API.md
+│   ├── ARCHITECTURE_DESIGN.md
+│   ├── DEPLOYMENT.md
+│   ├── QUICKSTART.md
+│   └── SECURITY.md
+├── tests/                     # Test suite
+│   ├── test_auth.py
+│   ├── test_resume.py
+│   ├── test_jobs.py
+│   └── test_security.py
+├── data/                      # Data storage
+│   └── career.db              # SQLite database
+├── docker-compose.yml         # Local dev setup
+├── start_backend.bat          # Windows start script
+├── start_frontend.bat         # Windows start script
+├── .env.example               # Environment template
 └── README.md
 ```
 
 ### Code Style
 
 - **Python**: Black, isort, pylint
-- **JavaScript**: Prettier, ESLint
-- **Git Hooks**: Pre-commit hooks for linting
+- **JavaScript**: Prettier, ESLint, Next.js conventions
 
 ```bash
 # Format code
-npm run format              # Frontend
-black backend/             # Backend
+cd frontend && npm run format    # Frontend
+black backend/                   # Backend
 
 # Lint
-npm run lint               # Frontend
-pylint backend/            # Backend
+cd frontend && npm run lint      # Frontend
 
 # Test
-npm test                   # Frontend
-pytest backend/            # Backend
+cd frontend && npm test          # Frontend
+pytest tests/                    # Backend
 ```
 
 ---
@@ -222,41 +294,64 @@ pytest backend/            # Backend
 ### Local Development
 
 ```bash
+# Terminal 1: Backend
+./start_backend.bat
+
+# Terminal 2: Frontend
+./start_frontend.bat
+
+# Or with Docker Compose:
 docker-compose up -d
 ```
 
 ### Cloud Deployment
 
-The system is designed for cloud deployment. See [Deployment Guide](./docs/DEPLOYMENT.md) for:
+See [Deployment Guide](./docs/DEPLOYMENT.md) for:
 
-- **AWS Deployment**: ECS, RDS, S3
-- **Azure Deployment**: App Service, Database, Blob Storage
-- **Kubernetes**: Full K8s setup with manifests
+- **AWS**: ECS, RDS, CloudFront
+- **Azure**: App Service, SQL Database
+- **Kubernetes**: Full K8s deployment with Helm
 - **CI/CD**: GitHub Actions pipelines
 
 ---
 
 ## Environment Variables
 
-See [.env.example](./.env.example) for all available configuration options.
+See [.env.example](./.env.example) for all configuration options.
 
-Key variables:
+**Required Variables**:
 
 ```bash
-# Database
-DATABASE_URL=postgresql://user:pass@localhost/resume_builder
+# Security
+JWT_SECRET=<generate-with: python -c "import secrets; print(secrets.token_hex(32))">
+JWT_ALGORITHM=HS256
+JWT_EXP_MINUTES=120
 
-# AI Providers
-OPENAI_API_KEY=sk-...
-ANTHROPIC_API_KEY=sk-ant-...
+# AI Provider (Free Groq API)
+GROQ_API_KEY=<get-free-key-at-https://console.groq.com>
 
-# Application
-SECRET_KEY=your-secret-key
-DEBUG=False
+# CORS & URLs
+CORS_ALLOW_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+BACKEND_URL=http://localhost:8000
+FRONTEND_URL=http://localhost:3000
+```
 
-# External APIs
+**Optional Variables**:
+
+```bash
+# Email (for verification & password reset)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+
+# GitHub OAuth
 GITHUB_CLIENT_ID=...
 GITHUB_CLIENT_SECRET=...
+
+# Monitoring
+PROMETHEUS_ENABLED=false
+SENTRY_DSN=...
 ```
 
 ---
@@ -267,7 +362,7 @@ GITHUB_CLIENT_SECRET=...
 
 ```bash
 # Run all tests
-pytest backend/
+pytest tests/
 
 # Run with coverage
 pytest --cov=backend backend/
