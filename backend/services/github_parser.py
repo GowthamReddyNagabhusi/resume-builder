@@ -7,8 +7,10 @@ All public APIs — no authentication required.
 import requests
 from datetime import datetime
 from backend.database import models as db
+from backend.core.logger import get_logger
 
 TIMEOUT = 15
+log = get_logger(__name__)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -63,11 +65,11 @@ def fetch_github(username: str) -> dict:
         }
 
         db.save_snapshot("github", data)
-        print(f"[GitHub] OK: {data['public_repos']} repos, {data['total_stars']} stars")
+        log.info("GitHub OK: %s repos, %s stars", data["public_repos"], data["total_stars"])
         return data
 
     except requests.RequestException as e:
-        print(f"[GitHub] Error: {e}")
+        log.error("GitHub error: %s", e)
         return db.get_latest_snapshot("github")
 
 
@@ -124,11 +126,11 @@ def fetch_codeforces(handle: str) -> dict:
         }
 
         db.save_snapshot("codeforces", data)
-        print(f"[Codeforces] OK: Rating {data['rating']} | {data['solved_count']} solved")
+        log.info("Codeforces OK: rating %s | solved %s", data["rating"], data["solved_count"])
         return data
 
     except Exception as e:
-        print(f"[Codeforces] Error: {e}")
+        log.error("Codeforces error: %s", e)
         return db.get_latest_snapshot("codeforces")
 
 
@@ -179,11 +181,11 @@ def fetch_leetcode(username: str) -> dict:
         }
 
         db.save_snapshot("leetcode", data)
-        print(f"[LeetCode] OK: {data['solved_total']} solved")
+        log.info("LeetCode OK: solved %s", data["solved_total"])
         return data
 
     except Exception as e:
-        print(f"[LeetCode] Error: {e}")
+        log.error("LeetCode error: %s", e)
         return db.get_latest_snapshot("leetcode")
 
 
@@ -193,9 +195,9 @@ def fetch_leetcode(username: str) -> dict:
 
 def update_all_stats(config: dict) -> dict:
     profile = config.get("profile", {})
-    print("\n[Stats] Starting update...")
+    log.info("Stats update starting")
     gh = fetch_github(profile.get("github_username", ""))
     cf = fetch_codeforces(profile.get("codeforces_handle", ""))
     lc = fetch_leetcode(profile.get("leetcode_username", ""))
-    print("[Stats] Update complete.\n")
+    log.info("Stats update complete")
     return {"github": gh, "codeforces": cf, "leetcode": lc}

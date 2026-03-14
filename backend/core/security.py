@@ -2,32 +2,23 @@
 
 from __future__ import annotations
 
-import base64
-import hashlib
-import hmac
-import os
 from datetime import datetime, timedelta, timezone
 from typing import Any
 from uuid import uuid4
 
 import jwt
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def hash_password(password: str) -> str:
-    salt = os.urandom(16)
-    pwd_hash = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, 200_000)
-    return f"pbkdf2_sha256$200000${base64.b64encode(salt).decode()}${base64.b64encode(pwd_hash).decode()}"
+    return pwd_context.hash(password)
 
 
 def verify_password(password: str, password_hash: str) -> bool:
     try:
-        algo, rounds, salt_b64, hash_b64 = password_hash.split("$", 3)
-        if algo != "pbkdf2_sha256":
-            return False
-        salt = base64.b64decode(salt_b64)
-        expected = base64.b64decode(hash_b64)
-        computed = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, int(rounds))
-        return hmac.compare_digest(computed, expected)
+        return pwd_context.verify(password, password_hash)
     except Exception:
         return False
 

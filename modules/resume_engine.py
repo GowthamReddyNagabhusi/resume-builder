@@ -8,7 +8,13 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-import database as db
+from backend.database import models as db
+
+try:
+    import reportlab  # noqa: F401
+    REPORTLAB_OK = True
+except ImportError:
+    REPORTLAB_OK = False
 
 try:
     from docx import Document

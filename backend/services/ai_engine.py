@@ -6,8 +6,11 @@ Groq-powered AI engine.
 import json
 import requests
 
+from backend.core.logger import get_logger
+
 GROQ_URL  = "https://api.groq.com/openai/v1/chat/completions"
 GROQ_MODEL = "llama-3.1-8b-instant"   # free tier, fast
+log = get_logger(__name__)
 
 
 # ── Groq (primary) ─────────────────────────────────────────
@@ -32,11 +35,11 @@ def _call_groq(api_key: str, prompt: str, max_tokens: int = 1024) -> str | None:
     except requests.exceptions.HTTPError as e:
         code = e.response.status_code if e.response else 0
         if code == 429:
-            print("[AI] Groq rate limit hit — wait a minute and retry.")
+            log.warning("Groq rate limit hit; retry shortly")
         else:
-            print(f"[AI] Groq HTTP {code}: {e}")
+            log.error("Groq HTTP %s: %s", code, e)
     except Exception as e:
-        print(f"[AI] Groq error: {e}")
+        log.error("Groq error: %s", e)
     return None
 
 
@@ -55,7 +58,7 @@ def generate(prompt: str, config: dict = None, max_tokens: int = 1024) -> str:
     if result:
         return result
 
-    print("[AI] Groq unavailable. Check your GROQ_API_KEY configuration.")
+    log.error("Groq unavailable. Check your GROQ_API_KEY configuration")
     return ""
 
 

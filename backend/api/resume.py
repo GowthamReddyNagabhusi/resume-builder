@@ -2,14 +2,16 @@
 backend/api/resume.py — Resume generation and download endpoints
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from pathlib import Path
 
 from backend.services.resume_builder import build_docx
+from backend.core.deps import get_current_user
 from backend.database import models as db
 from backend.core.settings import get_settings
+from math import ceil
 
 router = APIRouter(prefix="/api/resume", tags=["Resume"])
 
@@ -41,12 +43,22 @@ async def generate_resume(req: GenerateRequest):
 
 
 @router.get("/list")
-async def list_resumes():
+async def list_resumes(page: int = 1, per_page: int = 20, user: dict = Depends(get_current_user)):
     """List all previously generated resumes."""
+    _ = user
     try:
-        db.init_db()
-        resumes = db.get_resumes(limit=20)
-        return {"resumes": resumes}
+        page = max(page, 1)
+        per_page = min(max(per_page, 1), 100)
+        offset = (page - 1) * per_page
+        resumes = db.get_resumes(limit=per_page, offset=offset)
+        total = db.count_resumes()
+        return {
+            "resumes": resumes,
+            "page": page,
+            "per_page": per_page,
+            "total": total,
+            "pages": max(1, ceil(total / per_page)),
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

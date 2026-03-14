@@ -7,6 +7,7 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
+from math import ceil
 
 from backend.core.deps import get_current_user
 from backend.database import models as db
@@ -48,8 +49,19 @@ async def generate_dynamic_resume(req: ResumeConfigRequest, user: dict = Depends
 
 
 @router.get("/history")
-async def history(user: dict = Depends(get_current_user)):
-    return {"resumes": db.list_generated_resumes(user["id"])}
+async def history(page: int = 1, per_page: int = 20, user: dict = Depends(get_current_user)):
+    page = max(page, 1)
+    per_page = min(max(per_page, 1), 100)
+    offset = (page - 1) * per_page
+    resumes = db.list_generated_resumes(user["id"], limit=per_page, offset=offset)
+    total = db.count_generated_resumes(user["id"])
+    return {
+        "resumes": resumes,
+        "page": page,
+        "per_page": per_page,
+        "total": total,
+        "pages": max(1, ceil(total / per_page)),
+    }
 
 
 @router.get("/download/{resume_id}")

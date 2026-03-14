@@ -4,6 +4,7 @@ backend/api/github.py — GitHub import and project management endpoints
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from math import ceil
 
 from backend.services.github_parser import fetch_github
 from backend.database import models as db
@@ -40,11 +41,22 @@ async def import_github(username: str):
 
 
 @router.get("/projects")
-async def list_projects(all: bool = False):
+async def list_projects(all: bool = False, page: int = 1, per_page: int = 50):
     """List stored GitHub projects."""
     try:
-        projects = db.get_projects(limit=100, only_resume=not all)
-        return {"projects": projects, "count": len(projects)}
+        page = max(page, 1)
+        per_page = min(max(per_page, 1), 100)
+        offset = (page - 1) * per_page
+        projects = db.get_projects(limit=per_page, only_resume=not all, offset=offset)
+        total = db.count_projects(only_resume=not all)
+        return {
+            "projects": projects,
+            "count": len(projects),
+            "page": page,
+            "per_page": per_page,
+            "total": total,
+            "pages": max(1, ceil(total / per_page)),
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

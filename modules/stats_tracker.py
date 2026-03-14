@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-import database as db
+from backend.database import models as db
 
 TIMEOUT = 15  # seconds
 

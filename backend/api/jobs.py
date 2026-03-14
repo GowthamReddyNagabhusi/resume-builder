@@ -6,7 +6,10 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 
+from backend.core.deps import get_current_user
 from backend.database import models as db
+from fastapi import Depends
+from math import ceil
 
 router = APIRouter(prefix="/api/jobs", tags=["Job Tracker"])
 
@@ -29,24 +32,39 @@ class ApplicationUpdate(BaseModel):
 
 
 @router.get("")
-async def list_applications():
+async def list_applications(page: int = 1, per_page: int = 20, user: dict = Depends(get_current_user)):
     """Get all job applications."""
+    _ = user
     try:
-        apps = db.get_applications()
+        page = max(page, 1)
+        per_page = min(max(per_page, 1), 100)
+        offset = (page - 1) * per_page
+
+        apps = db.get_applications(limit=per_page, offset=offset)
+        total = db.count_applications()
+        pages = max(1, ceil(total / per_page))
         # Group by status for Kanban view
         kanban = {s: [] for s in VALID_STATUSES}
         for app in apps:
             status = app.get("status", "applied")
             if status in kanban:
                 kanban[status].append(app)
-        return {"applications": apps, "kanban": kanban, "total": len(apps)}
+        return {
+            "applications": apps,
+            "kanban": kanban,
+            "page": page,
+            "per_page": per_page,
+            "total": total,
+            "pages": pages,
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("")
-async def create_application(req: ApplicationCreate):
+async def create_application(req: ApplicationCreate, user: dict = Depends(get_current_user)):
     """Add a new job application."""
+    _ = user
     try:
         app_id = db.add_application(
             company=req.company,
@@ -60,8 +78,9 @@ async def create_application(req: ApplicationCreate):
 
 
 @router.put("/{app_id}")
-async def update_application(app_id: int, req: ApplicationUpdate):
+async def update_application(app_id: int, req: ApplicationUpdate, user: dict = Depends(get_current_user)):
     """Update an application (status, notes, etc.)."""
+    _ = user
     try:
         updates = req.model_dump(exclude_none=True)
         if not updates:
@@ -80,8 +99,9 @@ async def update_application(app_id: int, req: ApplicationUpdate):
 
 
 @router.delete("/{app_id}")
-async def delete_application(app_id: int):
+async def delete_application(app_id: int, user: dict = Depends(get_current_user)):
     """Delete a job application."""
+    _ = user
     try:
         db.delete_application(app_id)
         return {"success": True, "id": app_id}

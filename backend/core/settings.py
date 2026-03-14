@@ -8,9 +8,12 @@ from typing import Any
 
 import yaml
 
+from backend.core.logger import get_logger
+
 ROOT_DIR = Path(__file__).resolve().parents[2]
 CONFIG_PATH = ROOT_DIR / "config.yaml"
 ENV_PATH = ROOT_DIR / ".env"
+log = get_logger(__name__)
 
 
 def _load_yaml_config() -> dict[str, Any]:
@@ -40,11 +43,21 @@ def get_settings() -> dict[str, Any]:
     auth_cfg = cfg.setdefault("auth", {})
     groq_cfg = cfg.setdefault("groq", {})
 
-    app_cfg["jwt_secret"] = os.getenv("JWT_SECRET", auth_cfg.get("jwt_secret", "change-me-in-env"))
+    jwt_secret = os.getenv("JWT_SECRET", "")
+    weak_values = {"change-me-in-env", "change_this_to_a_long_random_secret"}
+    if not jwt_secret or jwt_secret in weak_values or len(jwt_secret) < 32:
+        raise RuntimeError(
+            "Invalid JWT_SECRET. Set a strong value in .env. "
+            "Generate one with: python -c \"import secrets; print(secrets.token_hex(32))\""
+        )
+
+    app_cfg["jwt_secret"] = jwt_secret
     app_cfg["jwt_algorithm"] = os.getenv("JWT_ALGORITHM", auth_cfg.get("jwt_algorithm", "HS256"))
     app_cfg["jwt_exp_minutes"] = int(os.getenv("JWT_EXP_MINUTES", auth_cfg.get("jwt_exp_minutes", 120)))
 
     # Always read Groq key from env first so keys are never committed.
     groq_cfg["api_key"] = os.getenv("GROQ_API_KEY", groq_cfg.get("api_key", ""))
+
+    log.info("JWT secret validated (len=%d)", len(jwt_secret))
 
     return cfg

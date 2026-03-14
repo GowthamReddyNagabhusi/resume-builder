@@ -62,6 +62,17 @@ def task_sync_platforms_for_users():
         log.error(f"User platform sync failed: {e}")
 
 
+def task_cleanup_sessions():
+    log.info("Scheduled: cleaning expired/revoked sessions...")
+    try:
+        import backend.database.models as db
+
+        deleted = db.cleanup_expired_sessions()
+        log.info("Session cleanup done. Deleted=%s", deleted)
+    except Exception as e:
+        log.error(f"Session cleanup failed: {e}")
+
+
 class SimpleScheduler:
     def __init__(self):
         self._jobs = []
@@ -111,6 +122,7 @@ def main():
     platform_interval = sched_cfg.get("platform_sync_interval_hours", 6)
     scheduler.every(stats_interval, task_update_stats, config)
     scheduler.every(platform_interval, task_sync_platforms_for_users)
+    scheduler.every(24, task_cleanup_sessions)
     log.info(f"Stats fetch scheduled every {stats_interval}h")
     log.info(f"Platform sync scheduled every {platform_interval}h")
 

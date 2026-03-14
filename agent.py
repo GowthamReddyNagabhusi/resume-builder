@@ -84,7 +84,7 @@ def send_telegram_message(config, text):
 def task_nightly_report(config):
     log.info("Scheduled: sending nightly report...")
     try:
-        import database as db
+        from backend.database import models as db
         gh = db.get_latest_snapshot("github")
         cf = db.get_latest_snapshot("codeforces")
         lc = db.get_latest_snapshot("leetcode")
@@ -166,7 +166,7 @@ def main():
     (BASE_DIR / "resume").mkdir(exist_ok=True)
 
     # Init DB
-    import database as db
+    from backend.database import models as db
     db.init_db()
 
     config = load_config()

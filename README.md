@@ -1,175 +1,347 @@
-# CareerForge
+# Resume Builder - AI-Powered Resume Compiler
 
-> AI-powered developer career platform — profile-first onboarding, dynamic resume generation, job tracking, and AI writing with **FastAPI + Next.js + Groq**.
+## Overview
 
-![Dashboard](https://img.shields.io/badge/Status-v2.0.0--stable-brightgreen) ![Python](https://img.shields.io/badge/Python-3.13-blue) ![Next.js](https://img.shields.io/badge/Next.js-16-black) ![License](https://img.shields.io/badge/License-MIT-purple)
+**Resume Builder** is an enterprise-grade, AI-powered platform that compiles resumes automatically. Instead of manually writing resumes for each job application, users provide structured career data once, and the system automatically generates role-specific, ATS-optimized resumes using advanced AI.
+
+### Key Features
+
+- **Career Data Compiler**: Store all career information (education, experience, skills, projects, certifications) in one place
+- **AI-Powered Resume Generation**: Automatically generate role-specific resumes tailored to job descriptions
+- **External Platform Integration**: Connect GitHub, LeetCode, Codeforces, and other platforms to automatically import career data
+- **Template System**: Multiple professionally-designed resume templates
+- **ATS Optimization**: AI-powered optimization for Applicant Tracking Systems
+- **Multi-User SaaS**: Secure authentication and multi-user support
+- **Cloud-Ready**: Designed for scalable deployment to AWS, Azure, or other cloud providers
+
+### Why Resume Builder?
+
+**Problem**: Creating tailored resumes for each job application is time-consuming and repetitive.
+
+**Solution**: Provide structured career data once. The system compiles role-specific, optimized resumes using AI.
+
+**Result**: Spend more time applying to jobs, less time writing resumes.
 
 ---
 
-## What It Does
+## System Architecture
 
-| Feature | Description |
-|---|---|
-| **Smart Resume Builder** | Picks your 2–3 best GitHub projects by stars, description quality, and recency. Generates FAANG-level bullet points via Groq AI. Exports as DOCX. |
-| **Job Tracker** | Kanban board — track applications across Applied → Interview → Offer / Rejected |
-| **GitHub Import** | Fetches all your repos. Toggle which ones appear on your resume. |
-| **AI Writer** | Cover letter generator, resume improver, and freeform AI chat — all powered by Groq |
-| **Live Stats Dashboard** | Auto-syncs your GitHub repos, Codeforces rating, and LeetCode solve count |
+### Technology Stack
 
----
+**Backend**:
+- **Framework**: FastAPI (Python async framework)
+- **Database**: PostgreSQL
+- **ORM**: SQLAlchemy
+- **AI Integration**: OpenAI/Anthropic APIs with modular fallbacks
+- **Caching**: Redis
+- **Authentication**: JWT + OAuth2
 
-## Tech Stack
+**Frontend**:
+- **Framework**: Next.js (React)
+- **Styling**: Tailwind CSS
+- **State Management**: Zustand/React Context
+- **HTTP Client**: Axios
+
+**Infrastructure**:
+- **Containerization**: Docker
+- **Orchestration**: Docker Compose (dev), Kubernetes (production)
+- **CI/CD**: GitHub Actions
+- **Cloud**: AWS/Azure ready
+
+### Architecture Diagram
 
 ```
-Frontend:  Next.js 16  (pages router, modern professional UI)
-Backend:   FastAPI     (Python 3.13, async, Swagger UI at /docs)
-Database:  SQLite      (career.db — projects, resumes, jobs, stats)
-AI:        Groq Cloud  (llama-3.1-8b-instant — free tier, fast)
-Resume:    python-docx (DOCX output, A4 format, styled)
+┌─────────────────────────────────────────────────────────────┐
+│                     Frontend (Next.js)                      │
+│  Pages: Auth, Dashboard, Career Data, Resume Generation   │
+└─────────────────────────────────────────────────────────────┘
+                              ↓ (HTTPS/REST)
+┌─────────────────────────────────────────────────────────────┐
+│                   Backend API (FastAPI)                     │
+│  Routes: Auth, Career Data, Resume, Integrations, Admin   │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+     ┌────────────────────────┼────────────────────────┐
+     ↓                        ↓                        ↓
+┌──────────┐          ┌──────────────┐         ┌──────────────┐
+│PostgreSQL│          │ AI Pipeline  │         │     Redis    │
+│Database  │          │  (Multi-LLM) │         │  (Cache)     │
+└──────────┘          └──────────────┘         └──────────────┘
+                              ↓
+              ┌──────────────────────────────┐
+              │  External Platform APIs      │
+              │ GitHub, LeetCode, etc        │
+              └──────────────────────────────┘
 ```
+
+For detailed architecture, see [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md).
 
 ---
 
 ## Quick Start
 
-### 1. Prerequisites
-- Python 3.10+
-- Node.js 18+
-- A free [Groq API key](https://console.groq.com/keys)
+### Prerequisites
 
-### 2. Install Backend
+- Docker & Docker Compose
+- Git
+- Python 3.11+ (for local development without Docker)
+- Node.js 18+ (for frontend development)
+
+### Local Development (Recommended)
+
+**Using Docker** (simplest):
+
 ```bash
-pip install fastapi uvicorn[standard] python-docx pyyaml requests
+# Clone repository
+git clone https://github.com/yourusername/resume-builder.git
+cd resume-builder
+
+# Run setup script
+./scripts/setup.sh  # Linux/Mac
+# or
+.\scripts\setup.bat  # Windows
+
+# Navigate to http://localhost:3000
 ```
 
-### 3. Configure (Secure)
-Do not put secrets in `config.yaml`.
+**Without Docker**:
 
-Create `.env` from `.env.example`:
+See [Local Setup Guide](./docs/setup/LOCAL_SETUP.md)
+
+### Common Commands
+
 ```bash
-copy .env.example .env
-```
+# Start services
+docker-compose up -d
 
-Set these values in `.env`:
-```env
-GROQ_API_KEY=your_real_groq_key
-JWT_SECRET=use_a_long_random_secret
-JWT_ALGORITHM=HS256
-JWT_EXP_MINUTES=120
-```
+# View logs
+docker-compose logs -f backend
+docker-compose logs -f frontend
 
-Profile defaults can still be configured in `config.yaml`.
+# Stop services
+docker-compose down
 
-### 4. Install Frontend
-```bash
-cd frontend
-npm install
-```
-
-### 5. Run
-
-**Terminal 1 — Backend:**
-```bash
-start_backend.bat          # Windows
-# or: py -3 -m uvicorn backend.main:app --reload --port 8000
-```
-
-**Terminal 2 — Frontend:**
-```bash
-start_frontend.bat         # Windows
-# or: cd frontend && npm run dev
-```
-
-- **Dashboard:** http://localhost:3000
-- **API Docs (Swagger):** http://localhost:8000/docs
-
----
-
-## Project Structure
-
-```
-careerforge/
-├── backend/
-│   ├── main.py                   # FastAPI entry point
-│   ├── database/models.py        # SQLite schema & queries
-│   ├── services/
-│   │   ├── ai_engine.py          # Groq AI wrapper
-│   │   ├── github_parser.py      # GitHub / Codeforces / LeetCode APIs
-│   │   └── resume_builder.py     # Smart project picker + DOCX builder
-│   └── api/
-│       ├── resume.py             # POST /generate, GET /download
-│       ├── ai.py                 # /generate, /cover-letter, /improve-resume
-│       ├── github.py             # /import, /projects
-│       ├── jobs.py               # Job tracker CRUD
-│       └── stats.py              # Stats snapshots
-├── frontend/
-│   ├── pages/                    # index, resume, github, jobs, ai
-│   ├── components/Layout.js      # Sidebar navigation
-│   ├── lib/api.js                # API client
-│   └── styles/globals.css        # Dark glassmorphism design system
-├── scheduler.py                  # Background stats refresh daemon
-├── config.yaml                   # User profile + API keys
-├── start_backend.bat
-└── start_frontend.bat
+# Access services
+API: http://localhost:8000
+API Docs: http://localhost:8000/docs
+Frontend: http://localhost:3000
+Database Admin: http://localhost:5050
 ```
 
 ---
 
-## AI — How It Works
+## API Documentation
+
+The API is fully documented with interactive Swagger UI:
+
+**Swagger UI**: http://localhost:8000/docs
+**ReDoc**: http://localhost:8000/redoc
+
+### Example API Calls
+
+**Generate Resume**:
+
+```bash
+curl -X POST http://localhost:8000/api/v1/resumes/generate \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "job_description": "We are looking for a Python developer...",
+    "template_id": "modern",
+    "title": "Software Engineer - XYZ Company"
+  }'
+```
+
+**Get Career Data**:
+
+```bash
+curl http://localhost:8000/api/v1/career/summary \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+See API documentation for complete endpoint reference.
+
+---
+
+## Development Workflow
+
+### Project Structure
 
 ```
-Request
-  │
-  └─► Groq Cloud — llama-3.1-8b-instant, free tier
+resume-builder/
+├── backend/              # FastAPI backend
+│   ├── app/
+│   │   ├── api/         # API endpoint handlers
+│   │   ├── ai/          # AI pipeline modules
+│   │   ├── services/    # Business logic layer
+│   │   ├── database/    # Database models
+│   │   └── core/        # Configuration, exceptions, security
+│   ├── requirements.txt
+│   └── tests/
+├── frontend/            # Next.js frontend
+│   ├── src/
+│   │   ├── pages/       # Page components
+│   │   ├── components/  # Reusable components
+│   │   ├── lib/         # Utilities and API client
+│   │   └── styles/      # CSS
+│   ├── package.json
+│   └── public/
+├── infra/              # Infrastructure configuration
+│   ├── docker/         # Dockerfiles
+│   ├── kubernetes/     # K8s manifests
+│   └── terraform/      # IaC templates
+├── docs/               # Documentation
+├── docker-compose.yml  # Local development
+└── README.md
+```
+
+### Code Style
+
+- **Python**: Black, isort, pylint
+- **JavaScript**: Prettier, ESLint
+- **Git Hooks**: Pre-commit hooks for linting
+
+```bash
+# Format code
+npm run format              # Frontend
+black backend/             # Backend
+
+# Lint
+npm run lint               # Frontend
+pylint backend/            # Backend
+
+# Test
+npm test                   # Frontend
+pytest backend/            # Backend
 ```
 
 ---
 
-## Smart Project Picker
+## Deployment
 
-The resume builder doesn't just dump all your repos. It scores each project:
+### Local Development
 
-| Signal | Weight |
-|---|---|
-| GitHub Stars | 30 pts |
-| Description quality | 25 pts |
-| Last updated (recency) | 20 pts |
-| Has real language | 15 pts |
-| Good project name | 10 pts |
+```bash
+docker-compose up -d
+```
 
-Then picks **2–3 best projects** with language diversity (max 2 same language).
+### Cloud Deployment
+
+The system is designed for cloud deployment. See [Deployment Guide](./docs/DEPLOYMENT.md) for:
+
+- **AWS Deployment**: ECS, RDS, S3
+- **Azure Deployment**: App Service, Database, Blob Storage
+- **Kubernetes**: Full K8s setup with manifests
+- **CI/CD**: GitHub Actions pipelines
+
+---
+
+## Environment Variables
+
+See [.env.example](./.env.example) for all available configuration options.
+
+Key variables:
+
+```bash
+# Database
+DATABASE_URL=postgresql://user:pass@localhost/resume_builder
+
+# AI Providers
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+
+# Application
+SECRET_KEY=your-secret-key
+DEBUG=False
+
+# External APIs
+GITHUB_CLIENT_ID=...
+GITHUB_CLIENT_SECRET=...
+```
+
+---
+
+## Testing
+
+### Backend Tests
+
+```bash
+# Run all tests
+pytest backend/
+
+# Run with coverage
+pytest --cov=backend backend/
+
+# Run specific test
+pytest backend/tests/test_api/test_auth.py::test_login
+```
+
+### Frontend Tests
+
+```bash
+# Run tests
+npm test
+
+# Watch mode
+npm run test:watch
+
+# Coverage
+npm test -- --coverage
+```
+
+---
+
+## Security
+
+- **Authentication**: JWT tokens with refresh tokens
+- **Authorization**: Role-based access control
+- **API Keys**: Encrypted storage
+- **HTTPS**: Required in production
+- **Rate Limiting**: Per-user and per-IP
+- **Input Validation**: Server-side validation with Pydantic
+- **CORS**: Configurable origins
+- **SQL Injection**: Protected via SQLAlchemy ORM
+- **XSS**: React auto-escaping + CSP headers
+
+---
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Submit a Pull Request
+
+---
+
+## License
+
+This project is licensed under the MIT License - see [LICENSE](./LICENSE) file for details.
+
+---
+
+## Support & Community
+
+- **Issues**: GitHub Issues
+- **Discussions**: GitHub Discussions
+- **Documentation**: [docs/](./docs/)
 
 ---
 
 ## Roadmap
 
-- [ ] PostgreSQL migration
-- [ ] Auth (Supabase)
-- [ ] PDF export
-- [ ] Docker deploy
-- [ ] Portfolio website auto-generator
+- [ ] Cover letter generation
+- [ ] Interview coaching AI
+- [ ] Job board integration
+- [ ] Resume analytics
+- [ ] Team collaboration features
+- [ ] Mobile app (React Native)
+- [ ] Advanced customization options
 
 ---
 
-## New Career Platform APIs
-
-The platform now supports a multi-user career profile workflow:
-
-- `POST /api/auth/signup`
-- `POST /api/auth/login`
-- `GET /api/auth/me`
-- `POST /api/auth/logout`
-- `POST /api/profile/setup` (career setup wizard)
-- `GET /api/profile/me`
-- `POST /api/templates/upload`
-- `GET /api/templates`
-- `POST /api/dynamic-resume/generate`
-- `GET /api/dynamic-resume/history`
-- `GET /api/dynamic-resume/download/{id}`
-- `POST /api/platforms/sync`
-- `POST /api/ai/improve-bullet`
-
----
+**Start building better resumes today! 🚀**
 
 ## License
 

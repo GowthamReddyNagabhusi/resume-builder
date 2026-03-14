@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from backend.core.security import decode_access_token
@@ -12,16 +12,24 @@ from backend.database import models as db
 bearer_scheme = HTTPBearer(auto_error=False)
 
 
-def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)) -> dict:
-    if not credentials or credentials.scheme.lower() != "bearer":
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing bearer token")
+def get_current_user(
+    request: Request,
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+) -> dict:
+    token = ""
+    if credentials and credentials.scheme.lower() == "bearer":
+        token = credentials.credentials
+    if not token:
+        token = request.cookies.get("access_token", "")
+    if not token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing authentication token")
 
     cfg = get_settings()
     secret = cfg.get("app", {}).get("jwt_secret", "")
     algo = cfg.get("app", {}).get("jwt_algorithm", "HS256")
 
     try:
-        payload = decode_access_token(credentials.credentials, secret=secret, algorithm=algo)
+        payload = decode_access_token(token, secret=secret, algorithm=algo)
     except Exception:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token")
 

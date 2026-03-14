@@ -9,6 +9,7 @@ const navItems = [
     { href: "/resume-builder", icon: "📄", label: "Resume Builder" },
     { href: "/resume-history", icon: "🕓", label: "Resume History" },
     { href: "/jobs", icon: "🎯", label: "Job Tracker" },
+    { href: "/cover-letter", icon: "✉️", label: "Cover Letter" },
     { href: "/ai", icon: "🤖", label: "AI Writer" },
 ];
 

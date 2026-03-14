@@ -74,3 +74,8 @@ async def save_setup(payload: SetupPayload, user: dict = Depends(get_current_use
         return {"success": True}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/complete")
+async def complete_setup(payload: SetupPayload, user: dict = Depends(get_current_user)):
+    return await save_setup(payload, user)

@@ -9,6 +9,7 @@ from pathlib import Path
 from datetime import datetime
 
 from backend.services.ai_engine import generate_resume_bullets
+from backend.core.logger import get_logger
 from backend.database import models as db
 
 try:
@@ -27,6 +28,22 @@ LABEL_COLOR   = RGBColor(0x00, 0x33, 0xCC)
 BORDER_HEX    = "2F5496"
 
 OUTPUT_DIR = Path(__file__).parent.parent.parent / "resume"
+log = get_logger(__name__)
+
+
+def _parse_bullets(raw: str) -> list[str]:
+    text = (raw or "").strip()
+    if not text:
+        return []
+    try:
+        parsed = json.loads(text)
+        if isinstance(parsed, list):
+            items = [str(x).strip() for x in parsed]
+        else:
+            items = []
+    except Exception:
+        items = [line.strip("- *\t") for line in text.splitlines() if line.strip()]
+    return [x for x in items if 15 <= len(x) <= 200]
 
 
 # ── Smart project picker ────────────────────────────────────
@@ -101,9 +118,9 @@ def _select_best_projects(all_projects: list, max_count: int = 3) -> list:
             selected.append(proj)
             lang_count[lang] = lang_count.get(lang, 0) + 1
 
-    print(f"[Resume] Selected {len(selected)} best projects from {len(all_projects)} total")
+    log.info("Resume project selection: %d of %d", len(selected), len(all_projects))
     for p in selected:
-        print(f"  - {p['name']} (stars={p.get('stars',0)}, lang={p.get('language','?')})")
+        log.info("Selected project: %s (stars=%s, lang=%s)", p["name"], p.get("stars", 0), p.get("language", "?"))
 
     return selected
 
@@ -221,7 +238,7 @@ def build_docx(config: dict, job_role: str = "", job_description: str = "") -> d
     # Generate AI bullets for selected projects
     project_bullets = {}
     for proj in projs:
-        print(f"[Resume] Generating bullets for: {proj['name']}")
+        log.info("Generating bullets for project %s", proj["name"])
         project_bullets[proj["name"]] = generate_resume_bullets(proj, config=config)
 
     # ── Build DOCX ─────────────────────────────────────────
@@ -365,5 +382,5 @@ def build_docx(config: dict, job_role: str = "", job_description: str = "") -> d
         ai_content=json.dumps(project_bullets),
     )
 
-    print(f"[Resume] Saved -> {file_path}")
+    log.info("Resume saved -> %s", file_path)
     return {"file_path": file_path, "resume_id": resume_id, "filename": filename}

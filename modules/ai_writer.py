@@ -16,7 +16,7 @@ from pathlib import Path
 from datetime import datetime
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-import database as db
+from backend.database import models as db
 
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"

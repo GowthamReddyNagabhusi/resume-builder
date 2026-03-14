@@ -7,3 +7,10 @@ PyJWT
 python-multipart
 pydantic[email]
 reportlab
+passlib[bcrypt]
+bcrypt==4.0.1
+slowapi
+alembic
+sentry-sdk
+prometheus-fastapi-instrumentator
+pytest
