@@ -97,11 +97,20 @@ def init_db() -> None:
                 cgpa TEXT,
                 start_year INTEGER,
                 end_year INTEGER,
+                start_month TEXT,
+                end_month TEXT,
+                is_current INTEGER DEFAULT 0,
+                grade_type TEXT DEFAULT 'CGPA',
                 created_at TEXT NOT NULL,
                 FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
             )
             """
         )
+        # Migration: add new education columns if missing
+        edu_cols = {row[1] for row in c.execute("PRAGMA table_info(education)").fetchall()}
+        for col, default in [("start_month", "NULL"), ("end_month", "NULL"), ("is_current", "0"), ("grade_type", "'CGPA'")]:
+            if col not in edu_cols:
+                c.execute(f"ALTER TABLE education ADD COLUMN {col} {'TEXT' if col.endswith('month') or col == 'grade_type' else 'INTEGER'} DEFAULT {default}")
         c.execute(
             """
             CREATE TABLE IF NOT EXISTS coding_platforms (
@@ -269,6 +278,7 @@ def init_db() -> None:
             """
             CREATE TABLE IF NOT EXISTS resumes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
                 title TEXT,
                 job_role TEXT,
                 file_path TEXT,
@@ -277,6 +287,10 @@ def init_db() -> None:
             )
             """
         )
+        # Migration: add user_id to resumes if missing
+        resume_cols = {row[1] for row in c.execute("PRAGMA table_info(resumes)").fetchall()}
+        if "user_id" not in resume_cols:
+            c.execute("ALTER TABLE resumes ADD COLUMN user_id INTEGER DEFAULT 1")
         c.execute(
             """
             CREATE TABLE IF NOT EXISTS applications (
@@ -291,9 +305,43 @@ def init_db() -> None:
             )
             """
         )
-        c.execute("CREATE TABLE IF NOT EXISTS manual_skills (id INTEGER PRIMARY KEY AUTOINCREMENT, skill TEXT UNIQUE NOT NULL, added_at TEXT)")
+        c.execute("CREATE TABLE IF NOT EXISTS manual_skills (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, skill TEXT NOT NULL, added_at TEXT)")
+        # Migration: add user_id to manual_skills if missing
+        ms_cols = {row[1] for row in c.execute("PRAGMA table_info(manual_skills)").fetchall()}
+        if "user_id" not in ms_cols:
+            c.execute("ALTER TABLE manual_skills ADD COLUMN user_id INTEGER DEFAULT 1")
         c.execute("CREATE TABLE IF NOT EXISTS manual_certs (id INTEGER PRIMARY KEY AUTOINCREMENT, cert TEXT NOT NULL, added_at TEXT)")
         c.execute("CREATE TABLE IF NOT EXISTS manual_experience (id INTEGER PRIMARY KEY AUTOINCREMENT, entry TEXT NOT NULL, added_at TEXT)")
+        # Achievements table
+        c.execute(
+            """
+            CREATE TABLE IF NOT EXISTS achievements (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                title TEXT NOT NULL,
+                description TEXT,
+                organization TEXT,
+                date TEXT,
+                link TEXT,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+            """
+        )
+        # Platform links table
+        c.execute(
+            """
+            CREATE TABLE IF NOT EXISTS platform_links (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                platform TEXT NOT NULL,
+                username TEXT,
+                profile_url TEXT,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+            """
+        )
         c.execute(
             """
             CREATE TABLE IF NOT EXISTS ai_cache (
@@ -416,7 +464,8 @@ def add_application(company: str, role: str, link: str = "", notes: str = "") ->
             "INSERT INTO applications (company, role, status, notes, link, applied_at, updated_at) VALUES (?,?,?,?,?,?,?)",
             (company, role, "applied", notes, link, now, now),
         )
-        return int(cur.lastrowid)
+        row_id = cur.lastrowid
+    return int(row_id or 0)
 
 
 def get_applications(limit: int | None = None, offset: int = 0) -> list[dict[str, Any]]:
@@ -453,48 +502,76 @@ def delete_application(app_id: int) -> None:
 
 # resumes
 
-def log_resume(title: str, job_role: str = "", file_path: str = "", ai_content: str = "") -> int:
+def log_resume(title: str, job_role: str = "", file_path: str = "", ai_content: str = "", user_id: int | None = None) -> int:
     if not file_path and title:
         file_path = title
         title = Path(file_path).stem
     with get_db() as conn:
         cur = conn.execute(
-            "INSERT INTO resumes (title, job_role, file_path, ai_content, generated_at) VALUES (?,?,?,?,?)",
-            (title, job_role, file_path, ai_content, datetime.now(timezone.utc).isoformat()),
+            "INSERT INTO resumes (user_id, title, job_role, file_path, ai_content, generated_at) VALUES (?,?,?,?,?,?)",
+            (user_id, title, job_role, file_path, ai_content, datetime.now(timezone.utc).isoformat()),
         )
-        return int(cur.lastrowid)
+        row_id = cur.lastrowid
+    return int(row_id or 0)
 
 
-def get_resumes(limit: int = 20, offset: int = 0) -> list[dict[str, Any]]:
+def get_resumes(limit: int = 20, offset: int = 0, user_id: int | None = None) -> list[dict[str, Any]]:
+    q = "SELECT id, user_id, title, job_role, file_path, generated_at FROM resumes"
+    args: list[Any] = []
+    if user_id is not None:
+        q += " WHERE user_id=?"
+        args.append(user_id)
+    q += " ORDER BY generated_at DESC LIMIT ? OFFSET ?"
+    args.extend([limit, offset])
     with get_db() as conn:
-        rows = conn.execute(
-            "SELECT id, title, job_role, file_path, generated_at FROM resumes ORDER BY generated_at DESC LIMIT ? OFFSET ?",
-            (limit, offset),
-        ).fetchall()
+        rows = conn.execute(q, tuple(args)).fetchall()
     return [dict(r) for r in rows]
 
 
-def count_resumes() -> int:
+def count_resumes(user_id: int | None = None) -> int:
+    q = "SELECT COUNT(*) AS c FROM resumes"
+    args: list[Any] = []
+    if user_id is not None:
+        q += " WHERE user_id=?"
+        args.append(user_id)
     with get_db() as conn:
-        row = conn.execute("SELECT COUNT(*) AS c FROM resumes").fetchone()
+        row = conn.execute(q, tuple(args)).fetchone()
     return int(row["c"] if row else 0)
 
 
 # manual data
 
-def add_skill(skill: str) -> bool:
+def add_skill(skill: str, user_id: int | None = None) -> bool:
     try:
         with get_db() as conn:
-            conn.execute("INSERT INTO manual_skills (skill, added_at) VALUES (?,?)", (skill.strip(), datetime.now(timezone.utc).isoformat()))
+            conn.execute(
+                "INSERT INTO manual_skills (user_id, skill, added_at) VALUES (?,?,?)",
+                (user_id, skill.strip(), datetime.now(timezone.utc).isoformat()),
+            )
         return True
     except sqlite3.IntegrityError:
         return False
 
 
-def get_manual_skills() -> list[str]:
+def get_manual_skills(user_id: int | None = None) -> list[str]:
+    q = "SELECT skill FROM manual_skills"
+    args: list[Any] = []
+    if user_id is not None:
+        q += " WHERE user_id=?"
+        args.append(user_id)
     with get_db() as conn:
-        rows = conn.execute("SELECT skill FROM manual_skills").fetchall()
+        rows = conn.execute(q, tuple(args)).fetchall()
     return [r["skill"] for r in rows]
+
+
+def delete_skill(skill_id: int, user_id: int | None = None) -> None:
+    q = "DELETE FROM manual_skills WHERE id=?"
+    args: list[Any] = [skill_id]
+    if user_id is not None:
+        q += " AND user_id=?"
+        args.append(user_id)
+    with get_db() as conn:
+        conn.execute(q, tuple(args))
 
 
 def add_cert(cert: str) -> None:
@@ -528,7 +605,8 @@ def create_user(name: str, email: str, password_hash: str) -> int:
             "INSERT INTO users (name, email, password_hash, created_at) VALUES (?,?,?,?)",
             (name.strip(), email.strip().lower(), password_hash, now),
         )
-        return int(cur.lastrowid)
+        row_id = cur.lastrowid
+    return int(row_id or 0)
 
 
 def get_user_by_email(email: str) -> dict[str, Any] | None:
@@ -644,7 +722,7 @@ def upsert_profile(user_id: int, payload: dict[str, Any]) -> None:
 
 def replace_rows(user_id: int, table: str, rows: list[dict[str, Any]]) -> None:
     allowed: dict[str, list[str]] = {
-        "education": ["university", "degree", "branch", "cgpa", "start_year", "end_year"],
+        "education": ["university", "degree", "branch", "cgpa", "start_year", "end_year", "start_month", "end_month", "is_current", "grade_type"],
         "coding_platforms": ["platform_name", "username", "profile_link"],
         "profile_projects": ["source", "title", "description", "tech_stack", "github_link", "live_link"],
         "internships": ["company", "role", "start_date", "end_date", "description", "technologies_used"],
@@ -866,3 +944,49 @@ def mark_password_reset_used(token: str) -> None:
 def update_user_password(user_id: int, password_hash: str) -> None:
     with get_db() as conn:
         conn.execute("UPDATE users SET password_hash=? WHERE id=?", (password_hash, user_id))
+
+
+# achievements
+
+def create_achievement(user_id: int, title: str, description: str = "", organization: str = "", date: str = "", link: str = "") -> int:
+    now = datetime.now(timezone.utc).isoformat()
+    with get_db() as conn:
+        cur = conn.execute(
+            "INSERT INTO achievements (user_id, title, description, organization, date, link, created_at) VALUES (?,?,?,?,?,?,?)",
+            (user_id, title.strip(), description.strip(), organization.strip(), date.strip(), link.strip(), now),
+        )
+        return int(cur.lastrowid)
+
+
+def get_achievements(user_id: int) -> list[dict[str, Any]]:
+    with get_db() as conn:
+        rows = conn.execute("SELECT * FROM achievements WHERE user_id=? ORDER BY id DESC", (user_id,)).fetchall()
+    return [dict(r) for r in rows]
+
+
+def delete_achievement(achievement_id: int, user_id: int) -> None:
+    with get_db() as conn:
+        conn.execute("DELETE FROM achievements WHERE id=? AND user_id=?", (achievement_id, user_id))
+
+
+# platform links
+
+def create_platform_link(user_id: int, platform: str, username: str = "", profile_url: str = "") -> int:
+    now = datetime.now(timezone.utc).isoformat()
+    with get_db() as conn:
+        cur = conn.execute(
+            "INSERT INTO platform_links (user_id, platform, username, profile_url, created_at) VALUES (?,?,?,?,?)",
+            (user_id, platform.strip(), username.strip(), profile_url.strip(), now),
+        )
+        return int(cur.lastrowid)
+
+
+def get_platform_links(user_id: int) -> list[dict[str, Any]]:
+    with get_db() as conn:
+        rows = conn.execute("SELECT * FROM platform_links WHERE user_id=? ORDER BY id DESC", (user_id,)).fetchall()
+    return [dict(r) for r in rows]
+
+
+def delete_platform_link(link_id: int, user_id: int) -> None:
+    with get_db() as conn:
+        conn.execute("DELETE FROM platform_links WHERE id=? AND user_id=?", (link_id, user_id))

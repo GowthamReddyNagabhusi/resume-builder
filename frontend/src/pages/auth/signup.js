@@ -18,6 +18,10 @@ export default function Signup() {
       setError('Passwords do not match');
       return;
     }
+    if (form.password.length < 8) {
+      setError('Password must be at least 8 characters');
+      return;
+    }
     setLoading(true);
     setError('');
     try {
@@ -30,54 +34,71 @@ export default function Signup() {
     }
   };
 
+  const fields = [
+    { label: 'Full Name', name: 'name', type: 'text', placeholder: 'Jane Doe' },
+    { label: 'Email', name: 'email', type: 'email', placeholder: 'jane@example.com' },
+    { label: 'Password', name: 'password', type: 'password', placeholder: 'Min. 8 characters' },
+    { label: 'Confirm Password', name: 'confirm', type: 'password', placeholder: 'Repeat password' },
+  ];
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-extrabold text-gray-900">Create your account</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Already have one?{' '}
-            <Link href="/auth/login" className="font-medium text-blue-600 hover:text-blue-500">
+    <div className="min-h-screen bg-surface-950 flex items-center justify-center px-4 relative overflow-hidden">
+      <div className="glow-orb w-[500px] h-[500px] bg-purple-600 top-[-100px] left-[-100px]" />
+      <div className="glow-orb w-[400px] h-[400px] bg-brand-600 bottom-[-50px] right-[-100px]" />
+
+      <div className="w-full max-w-md relative z-10 animate-scale-in">
+        <div className="flex items-center justify-center gap-2 mb-8">
+          <div className="w-10 h-10 rounded-xl bg-accent-gradient flex items-center justify-center text-white font-bold shadow-glow">
+            CF
+          </div>
+          <span className="text-xl font-bold text-white">CareerForge</span>
+        </div>
+
+        <div className="glass-card p-8">
+          <h1 className="text-2xl font-bold text-white text-center mb-2">Create Account</h1>
+          <p className="text-sm text-surface-400 text-center mb-8">
+            Start building production-quality resumes with AI
+          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-sm text-red-400 animate-slide-down">
+                {error}
+              </div>
+            )}
+
+            {fields.map(({ label, name, type, placeholder }) => (
+              <div key={name}>
+                <label className="block text-sm font-medium text-surface-300 mb-1.5">{label}</label>
+                <input
+                  name={name}
+                  type={type}
+                  required
+                  placeholder={placeholder}
+                  value={form[name]}
+                  onChange={handleChange}
+                  className="input-premium"
+                />
+              </div>
+            ))}
+
+            <button type="submit" disabled={loading} className="btn-primary w-full text-center !mt-6">
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="spinner !w-4 !h-4 !border-2" />
+                  Creating account…
+                </span>
+              ) : 'Create Account'}
+            </button>
+          </form>
+
+          <p className="mt-6 text-center text-sm text-surface-500">
+            Already have an account?{' '}
+            <Link href="/auth/login" className="text-brand-400 hover:text-brand-300 font-medium transition-colors">
               Sign in
             </Link>
           </p>
         </div>
-
-        <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
-          {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <p className="text-sm font-medium text-red-800">{error}</p>
-            </div>
-          )}
-
-          {[
-            { label: 'Full name', name: 'name', type: 'text', placeholder: 'Jane Doe' },
-            { label: 'Email address', name: 'email', type: 'email', placeholder: 'jane@example.com' },
-            { label: 'Password', name: 'password', type: 'password', placeholder: 'Min. 8 characters' },
-            { label: 'Confirm password', name: 'confirm', type: 'password', placeholder: 'Repeat password' },
-          ].map(({ label, name, type, placeholder }) => (
-            <div key={name}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-              <input
-                name={name}
-                type={type}
-                required
-                placeholder={placeholder}
-                value={form[name]}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          ))}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none disabled:opacity-50"
-          >
-            {loading ? 'Creating account…' : 'Create account'}
-          </button>
-        </form>
       </div>
     </div>
   );

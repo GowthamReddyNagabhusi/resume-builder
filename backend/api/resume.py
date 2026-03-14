@@ -25,11 +25,11 @@ class GenerateRequest(BaseModel):
 
 
 @router.post("/generate")
-async def generate_resume(req: GenerateRequest):
+async def generate_resume(req: GenerateRequest, user: dict = Depends(get_current_user)):
     """Generate a tailored DOCX resume using Groq AI."""
     try:
         config = _load_config()
-        result = build_docx(config, job_role=req.job_role, job_description=req.job_description)
+        result = build_docx(config, job_role=req.job_role, job_description=req.job_description, user_id=user["id"])
         if "error" in result:
             raise HTTPException(status_code=500, detail=result["error"])
         return {
@@ -38,20 +38,22 @@ async def generate_resume(req: GenerateRequest):
             "filename": result["filename"],
             "download_url": f"/api/resume/download/{result['resume_id']}"
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/list")
 async def list_resumes(page: int = 1, per_page: int = 20, user: dict = Depends(get_current_user)):
-    """List all previously generated resumes."""
-    _ = user
+    """List all previously generated resumes for the current user."""
+    uid = user["id"]
     try:
         page = max(page, 1)
         per_page = min(max(per_page, 1), 100)
         offset = (page - 1) * per_page
-        resumes = db.get_resumes(limit=per_page, offset=offset)
-        total = db.count_resumes()
+        resumes = db.get_resumes(limit=per_page, offset=offset, user_id=uid)
+        total = db.count_resumes(user_id=uid)
         return {
             "resumes": resumes,
             "page": page,
@@ -64,10 +66,11 @@ async def list_resumes(page: int = 1, per_page: int = 20, user: dict = Depends(g
 
 
 @router.get("/download/{resume_id}")
-async def download_resume(resume_id: int):
-    """Download a generated resume DOCX file."""
+async def download_resume(resume_id: int, user: dict = Depends(get_current_user)):
+    """Download a generated resume DOCX file (only if it belongs to the user)."""
+    uid = user["id"]
     try:
-        resumes = db.get_resumes(limit=100)
+        resumes = db.get_resumes(limit=100, user_id=uid)
         resume = next((r for r in resumes if r["id"] == resume_id), None)
         if not resume:
             raise HTTPException(status_code=404, detail="Resume not found")

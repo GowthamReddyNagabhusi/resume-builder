@@ -75,9 +75,6 @@ class APIClient {
     return this.request('/career/education', { method: 'POST', body: JSON.stringify(data) });
   }
   getEducation() { return this.request('/career/education'); }
-  updateEducation(id, data) {
-    return this.request(`/career/education/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-  }
   deleteEducation(id) {
     return this.request(`/career/education/${id}`, { method: 'DELETE' });
   }
@@ -86,9 +83,6 @@ class APIClient {
     return this.request('/career/experience', { method: 'POST', body: JSON.stringify(data) });
   }
   getExperience() { return this.request('/career/experience'); }
-  updateExperience(id, data) {
-    return this.request(`/career/experience/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-  }
   deleteExperience(id) {
     return this.request(`/career/experience/${id}`, { method: 'DELETE' });
   }
@@ -113,28 +107,57 @@ class APIClient {
     return this.request('/career/certifications', { method: 'POST', body: JSON.stringify(data) });
   }
   getCertifications() { return this.request('/career/certifications'); }
+  deleteCertification(id) {
+    return this.request(`/career/certifications/${id}`, { method: 'DELETE' });
+  }
+
+  // ── Achievements ────────────────────────────────────────────────
+  createAchievement(data) {
+    return this.request('/career/achievements', { method: 'POST', body: JSON.stringify(data) });
+  }
+  getAchievements() { return this.request('/career/achievements'); }
+  deleteAchievement(id) {
+    return this.request(`/career/achievements/${id}`, { method: 'DELETE' });
+  }
+
+  // ── Platform Links ─────────────────────────────────────────────
+  createPlatform(data) {
+    return this.request('/career/platforms', { method: 'POST', body: JSON.stringify(data) });
+  }
+  getPlatforms() { return this.request('/career/platforms'); }
+  deletePlatform(id) {
+    return this.request(`/career/platforms/${id}`, { method: 'DELETE' });
+  }
 
   // ── Resumes ──────────────────────────────────────────────────────
   generateResume(jobDescription, templateId, title) {
-    return this.request('/resumes/generate', {
+    return this.request('/resume/generate', {
       method: 'POST',
       body: JSON.stringify({
+        job_role: title || `Resume – ${new Date().toLocaleDateString()}`,
         job_description: jobDescription,
-        template_id: templateId,
-        title: title || `Resume – ${new Date().toLocaleDateString()}`,
       }),
     });
   }
 
-  getResumes() { return this.request('/resumes/'); }
-  getResume(resumeId) { return this.request(`/resumes/${resumeId}`); }
-  deleteResume(resumeId) {
-    return this.request(`/resumes/${resumeId}`, { method: 'DELETE' });
+  getResumes() { return this.request('/resume/list'); }
+
+  getResumeDownloadUrl(resumeId) {
+    return `${this.baseURL}/api/resume/download/${resumeId}`;
   }
 
-  getResumeDownloadUrl(resumeId, format = 'docx') {
-    const token = this.token || '';
-    return `${this.baseURL}/api/v1/resumes/${resumeId}/download?format=${format}&token=${token}`;
+  // ── Dynamic Resume ──────────────────────────────────────────────
+  generateDynamicResume(config) {
+    return this.request('/dynamic-resume/generate', {
+      method: 'POST',
+      body: JSON.stringify(config),
+    });
+  }
+
+  getResumeHistory() { return this.request('/dynamic-resume/history'); }
+
+  getDynamicResumeDownloadUrl(resumeId) {
+    return `${this.baseURL}/api/dynamic-resume/download/${resumeId}`;
   }
 
   // ── Integrations ─────────────────────────────────────────────────
@@ -151,6 +174,21 @@ class APIClient {
 
   // ── Templates ────────────────────────────────────────────────────
   getTemplates() { return this.request('/templates/'); }
+
+  // ── AI ────────────────────────────────────────────────────────────
+  getAIStatus() { return this.request('/ai/status'); }
+
+  generateCoverLetter(data) {
+    return this.request('/ai/cover-letter', { method: 'POST', body: JSON.stringify(data) });
+  }
+
+  improveResume(data) {
+    return this.request('/ai/improve-resume', { method: 'POST', body: JSON.stringify(data) });
+  }
+
+  scoreResume(data) {
+    return this.request('/ai/score-resume', { method: 'POST', body: JSON.stringify(data) });
+  }
 }
 
 export const apiClient = new APIClient();

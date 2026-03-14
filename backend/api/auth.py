@@ -115,6 +115,13 @@ async def signup(request: Request, req: SignUpRequest):
     return {"success": True, "user_id": user_id}
 
 
+@router.post("/register")
+@limiter.limit("5/minute")
+async def register(request: Request, req: SignUpRequest):
+    """Alias for /signup — used by the frontend API client."""
+    return await signup(request, req)
+
+
 @router.get("/verify-email")
 async def verify_email(token: str):
     rec = db.get_email_verification(token)
@@ -198,7 +205,7 @@ async def refresh_token(response: Response, user: dict = Depends(get_current_use
 async def me(user: dict = Depends(get_current_user)):
     bundle = db.get_profile_bundle(user["id"])
     setup_completed = bool((bundle.get("profile") or {}).get("setup_completed"))
-    return {"user": {**user, "setup_completed": setup_completed}}
+    return {**user, "setup_completed": setup_completed}
 
 
 @router.post("/logout")

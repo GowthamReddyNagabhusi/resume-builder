@@ -207,7 +207,7 @@ def _edu_entry(doc, institution, location, degree, grade, period):
 
 # ── Main builder ───────────────────────────────────────────
 
-def build_docx(config: dict, job_role: str = "", job_description: str = "") -> dict:
+def build_docx(config: dict, job_role: str = "", job_description: str = "", user_id: int | None = None) -> dict:
     """
     Build a tailored DOCX resume.
     - Picks 2-3 best projects intelligently
@@ -277,8 +277,8 @@ def build_docx(config: dict, job_role: str = "", job_description: str = "") -> d
 
     # Skills
     _section(doc, "SKILLS")
-    langs = list(skills_cfg.get("languages", []))
-    for s in db.get_manual_skills():
+    langs: list[str] = [str(x) for x in skills_cfg.get("languages", [])]
+    for s in db.get_manual_skills(user_id=user_id):
         if s not in langs:
             langs.append(s)
     _skill_line(doc, "Languages",            ", ".join(langs))
@@ -311,9 +311,9 @@ def build_docx(config: dict, job_role: str = "", job_description: str = "") -> d
     if all_exp:
         _section(doc, "TRAINING")
         for entry in all_exp:
-            parts      = [x.strip() for x in entry.split("||")]
+            parts: list[str] = [x.strip() for x in str(entry).split("||")]
             title_line = parts[0]
-            title_parts = [x.strip() for x in title_line.split("|")]
+            title_parts: list[str] = [x.strip() for x in title_line.split("|")]
             p = doc.add_paragraph()
             _spacing(p, before=60, after=20); _right_tab(p, 7.3)
             if len(title_parts) >= 3:
@@ -380,6 +380,7 @@ def build_docx(config: dict, job_role: str = "", job_description: str = "") -> d
         job_role=job_role or "General",
         file_path=file_path,
         ai_content=json.dumps(project_bullets),
+        user_id=user_id,
     )
 
     log.info("Resume saved -> %s", file_path)

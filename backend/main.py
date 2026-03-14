@@ -14,6 +14,7 @@ from slowapi import _rate_limit_exceeded_handler
 from backend.api import (
     ai,
     auth,
+    career,
     dynamic_resume,
     github,
     jobs,
@@ -146,12 +147,13 @@ async def security_headers(request: Request, call_next):
     return response
 
 # Mount routers
+app.include_router(auth.router)
+app.include_router(career.router)
 app.include_router(resume.router)
 app.include_router(ai.router)
 app.include_router(github.router)
 app.include_router(jobs.router)
 app.include_router(stats.router)
-app.include_router(auth.router)
 app.include_router(profile.router)
 app.include_router(templates.router)
 app.include_router(dynamic_resume.router)
