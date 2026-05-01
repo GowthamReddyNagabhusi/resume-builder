@@ -11,7 +11,13 @@ from typing import Any
 
 from backend.core.logger import get_logger
 
-DB_PATH = Path(__file__).resolve().parents[2] / "data" / "career.db"
+import os
+
+if os.environ.get("VERCEL"):
+    DB_PATH = Path("/tmp/career.db")
+else:
+    DB_PATH = Path(__file__).resolve().parents[2] / "data" / "career.db"
+
 log = get_logger(__name__)
 
 
