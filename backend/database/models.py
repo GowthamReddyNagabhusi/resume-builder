@@ -297,19 +297,12 @@ def init_db() -> None:
         project_cols = {row[1] for row in c.execute("PRAGMA table_info(projects)").fetchall()}
         if "user_id" not in project_cols:
             c.execute("ALTER TABLE projects ADD COLUMN user_id INTEGER DEFAULT 1")
-            
-        # Migration: add user_id to applications if missing
-        app_cols = {row[1] for row in c.execute("PRAGMA table_info(applications)").fetchall()}
-        if "user_id" not in app_cols:
-            c.execute("ALTER TABLE applications ADD COLUMN user_id INTEGER DEFAULT 1")
-        # Migration: add user_id to resumes if missing
-        resume_cols = {row[1] for row in c.execute("PRAGMA table_info(resumes)").fetchall()}
-        if "user_id" not in resume_cols:
-            c.execute("ALTER TABLE resumes ADD COLUMN user_id INTEGER DEFAULT 1")
+
         c.execute(
             """
             CREATE TABLE IF NOT EXISTS applications (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER DEFAULT 1,
                 company TEXT NOT NULL,
                 role TEXT NOT NULL,
                 status TEXT DEFAULT 'applied',
@@ -320,6 +313,10 @@ def init_db() -> None:
             )
             """
         )
+        # Migration: add user_id to applications if missing
+        app_cols = {row[1] for row in c.execute("PRAGMA table_info(applications)").fetchall()}
+        if "user_id" not in app_cols:
+            c.execute("ALTER TABLE applications ADD COLUMN user_id INTEGER DEFAULT 1")
         c.execute("CREATE TABLE IF NOT EXISTS manual_skills (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, skill TEXT NOT NULL, added_at TEXT)")
         # Migration: add user_id to manual_skills if missing
         ms_cols = {row[1] for row in c.execute("PRAGMA table_info(manual_skills)").fetchall()}
