@@ -45,6 +45,9 @@ def _parse_csv_env(name: str) -> list[str]:
     return [item.strip() for item in raw.split(",") if item.strip()]
 
 
+IS_SERVERLESS = bool(os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
+
+
 async def _session_cleanup_loop() -> None:
     while True:
         try:
@@ -60,18 +63,20 @@ async def lifespan(app: FastAPI):
     db.init_db()
     db.cleanup_expired_sessions()
 
-    try:
-        from alembic import command
-        from alembic.config import Config
+    if not IS_SERVERLESS:
+        try:
+            from alembic import command
+            from alembic.config import Config
 
-        if os.path.exists("alembic.ini"):
-            alembic_cfg = Config("alembic.ini")
-            command.upgrade(alembic_cfg, "head")
-            log.info("Alembic migrations applied")
-    except Exception as exc:
-        log.warning("Alembic migration skipped: %s", exc)
+            if os.path.exists("alembic.ini"):
+                alembic_cfg = Config("alembic.ini")
+                command.upgrade(alembic_cfg, "head")
+                log.info("Alembic migrations applied")
+        except Exception as exc:
+            log.warning("Alembic migration skipped: %s", exc)
 
-    cleanup_task = asyncio.create_task(_session_cleanup_loop())
+    # Background tasks are not supported in serverless environments.
+    cleanup_task = asyncio.create_task(_session_cleanup_loop()) if not IS_SERVERLESS else None
 
     sentry_dsn = os.getenv("SENTRY_DSN", "")
     if sentry_dsn:
@@ -85,7 +90,8 @@ async def lifespan(app: FastAPI):
 
     log.info("CareerForge backend ready at http://localhost:8000")
     yield
-    cleanup_task.cancel()
+    if cleanup_task is not None:
+        cleanup_task.cancel()
     log.info("CareerForge shutting down")
 
 app = FastAPI(
