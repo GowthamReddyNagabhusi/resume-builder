@@ -1,103 +1,65 @@
-# Resume Builder - AI-Powered Resume Compiler
+# CareerForge - AI-Powered Career Progression & Resume Engine
 
 ## Overview
 
-**Resume Builder** is an enterprise-grade, AI-powered platform that compiles resumes automatically. Instead of manually writing resumes for each job application, users provide structured career data once, and the system automatically generates role-specific, ATS-optimized resumes using advanced AI.
+**CareerForge** is an enterprise-grade platform that automates career progression. Beyond just resume generation, it is a holistic suite built to propel careers through intelligent insights, dynamic resumes, and automated profile syncing.
 
-### Key Features
+### 🚀 3 Core Features (Live Outcomes)
 
-- **Career Data Compiler**: Store all career information (education, experience, skills, projects, certifications) in one place
-- **AI-Powered Resume Generation**: Automatically generate role-specific resumes tailored to job descriptions
-- **External Platform Integration**: Connect GitHub, LeetCode, Codeforces, and other platforms to automatically import career data
-- **Template System**: Multiple professionally-designed resume templates
-- **ATS Optimization**: AI-powered optimization for Applicant Tracking Systems
-- **Multi-User SaaS**: Secure authentication and multi-user support
-- **Cloud-Ready**: Designed for scalable deployment to AWS, Azure, or other cloud providers
+1. **AI-Driven Dynamic Resumes**: Automatically generate ATS-optimized, role-specific resumes precisely tailored to target job descriptions using our multi-LLM pipeline.
+2. **Interactive Career Roadmaps**: Get personalized, step-by-step career progression paths identifying missing skills and suggesting the optimal path for promotion.
+3. **Automated Cross-Platform Sync**: Instant synchronization of your achievements from GitHub, LeetCode, and Codeforces directly into your master profile, eliminating manual updates.
 
-### Why Resume Builder?
+### Why CareerForge?
 
-**Problem**: Creating tailored resumes for each job application is time-consuming and repetitive.
-
-**Solution**: Provide structured career data once. The system compiles role-specific, optimized resumes using AI.
-
-**Result**: Spend more time applying to jobs, less time writing resumes.
+**Problem**: Applying to roles and managing career trajectory is fractured and repetitive. Applications get rejected by ATS systems, and keeping profiles updated takes hours.
+**Solution**: Provide your base data once. CareerForge dynamically builds ATS-beating resumes and syncs your accomplishments continuously.
+**Result**: Tangible increase in interview rates and clarity on skill gaps.
 
 ---
 
-## System Architecture
+## 🏗️ System Architecture & Outcomes
 
-### Technology Stack
+### Technology Stack & Architecture
 
-**Backend**:
-- **Framework**: FastAPI (Python async framework)
-- **Database**: SQLite (local), PostgreSQL-ready for production
-- **ORM**: SQLAlchemy ORM with raw SQL support
-- **AI Integration**: Groq API (free, fast), OpenAI/Anthropic fallbacks
-- **Authentication**: JWT tokens with refresh support
-- **Rate Limiting**: Token-bucket based
-- **Logging**: Structured JSON logging
+- **Frontend**: Next.js 16+ (React 18), Tailwind CSS, React Hook Form
+- **Backend API**: Python FastAPI, SQLAlchemy ORM
+- **AI Core**: Groq AI Engine (OpenAI/Anthropic ready fallback) for zero-latency generations.
+- **Database**: PostgreSQL / SQLite
+- **Infrastructure**: Docker Compose, GitHub Actions CI/CD ready.
 
-**Frontend**:
-- **Framework**: Next.js 16+ (React 18)
-- **Styling**: Tailwind CSS with @tailwindcss/forms
-- **State Management**: React Context API
-- **HTTP Client**: Fetch API with custom client
-- **Form Handling**: React Hook Form
-- **Auth Context**: Custom AuthContext provider
-
-**Infrastructure**:
-- **Containerization**: Docker
-- **Deployment**: Docker Compose or standalone
-- **CI/CD**: GitHub Actions ready
-- **Cloud**: AWS/Azure compatible
-
-### Architecture Diagram
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     Frontend (Next.js)                      │
-│  Pages: Auth, Dashboard, Career Data, Resume Generation   │
-└─────────────────────────────────────────────────────────────┘
-                              ↓ (HTTPS/REST)
-┌─────────────────────────────────────────────────────────────┐
-│                   Backend API (FastAPI)                     │
-│  Routes: Auth, Career Data, Resume, Integrations, Admin   │
-└─────────────────────────────────────────────────────────────┘
-                              ↓
-     ┌────────────────────────┼────────────────────────┐
-     ↓                        ↓                        ↓
-┌──────────┐          ┌──────────────┐         ┌──────────────┐
-│PostgreSQL│          │ AI Pipeline  │         │     Redis    │
-│Database  │          │  (Multi-LLM) │         │  (Cache)     │
-└──────────┘          └──────────────┘         └──────────────┘
-                              ↓
-              ┌──────────────────────────────┐
-              │  External Platform APIs      │
-              │ GitHub, LeetCode, etc        │
-              └──────────────────────────────┘
+```mermaid
+graph TD;
+    User[User / Client] -->|HTTPS/REST| F[Next.js Frontend]
+    F -->|HTTPS/REST| B[FastAPI Backend]
+    B --> DB[(PostgreSQL)]
+    B --> Redis[(Redis Cache)]
+    B --> AI[Multi-LLM AI Pipeline]
+    B --> API[GitHub/LeetCode APIs]
 ```
 
-For detailed architecture, see [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md).
+For a comprehensive technical breakdown, see [`ARCHITECTURE_DESIGN.md`](./ARCHITECTURE_DESIGN.md).
 
 ---
 
-## Quick Start
+## ⚡ Live Deployment / Quick Start
 
-### Prerequisites
-
-- Python 3.11+ (for local development)
-- Node.js 18+ (for frontend)
-- Git
-- Windows/Mac/Linux
-
-### Local Development (Recommended)
-
-**Quickest Setup**:
+CareerForge is containerized so you can get a *live version* up and running instantly on any machine using Docker.
 
 ```bash
-# Clone repository
-git clone https://github.com/yourusername/resume-builder.git
-cd resume-builder
+# 1. Clone repository
+git clone https://github.com/yourusername/career-forge.git
+cd career-forge
+
+# 2. Launch Live Environment (starts DB, Cache, Backend, and Frontend)
+docker-compose up --build -d
+```
+
+Your live app will be running instantly at:
+- **Frontend App**: [http://localhost:3000](http://localhost:3000)
+- **Backend API Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+
+*(Want to share it live on the web instantly? Run `npx localtunnel --port 3000`)*
 
 # Windows: Run startup scripts
 ./start_backend.bat     # Terminal 1
