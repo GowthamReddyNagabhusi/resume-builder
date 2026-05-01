@@ -34,14 +34,13 @@ class ApplicationUpdate(BaseModel):
 @router.get("")
 async def list_applications(page: int = 1, per_page: int = 20, user: dict = Depends(get_current_user)):
     """Get all job applications."""
-    _ = user
     try:
         page = max(page, 1)
         per_page = min(max(per_page, 1), 100)
         offset = (page - 1) * per_page
 
-        apps = db.get_applications(limit=per_page, offset=offset)
-        total = db.count_applications()
+        apps = db.get_applications(limit=per_page, offset=offset, user_id=user["id"])
+        total = db.count_applications(user_id=user["id"])
         pages = max(1, ceil(total / per_page))
         # Group by status for Kanban view
         kanban = {s: [] for s in VALID_STATUSES}
@@ -64,13 +63,13 @@ async def list_applications(page: int = 1, per_page: int = 20, user: dict = Depe
 @router.post("")
 async def create_application(req: ApplicationCreate, user: dict = Depends(get_current_user)):
     """Add a new job application."""
-    _ = user
     try:
         app_id = db.add_application(
             company=req.company,
             role=req.role,
             link=req.link,
-            notes=req.notes
+            notes=req.notes,
+            user_id=user["id"]
         )
         return {"success": True, "id": app_id, "status": "applied"}
     except Exception as e:
@@ -80,7 +79,6 @@ async def create_application(req: ApplicationCreate, user: dict = Depends(get_cu
 @router.put("/{app_id}")
 async def update_application(app_id: int, req: ApplicationUpdate, user: dict = Depends(get_current_user)):
     """Update an application (status, notes, etc.)."""
-    _ = user
     try:
         updates = req.model_dump(exclude_none=True)
         if not updates:
@@ -90,7 +88,7 @@ async def update_application(app_id: int, req: ApplicationUpdate, user: dict = D
                 status_code=400,
                 detail=f"Invalid status. Must be one of: {', '.join(VALID_STATUSES)}"
             )
-        db.update_application(app_id, **updates)
+        db.update_application(app_id, user_id=user["id"], **updates)
         return {"success": True, "id": app_id}
     except HTTPException:
         raise
@@ -101,9 +99,8 @@ async def update_application(app_id: int, req: ApplicationUpdate, user: dict = D
 @router.delete("/{app_id}")
 async def delete_application(app_id: int, user: dict = Depends(get_current_user)):
     """Delete a job application."""
-    _ = user
     try:
-        db.delete_application(app_id)
+        db.delete_application(app_id, user_id=user["id"])
         return {"success": True, "id": app_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

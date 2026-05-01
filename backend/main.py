@@ -119,12 +119,12 @@ cors_allow_origins = [
 cors_allow_origins.extend(_parse_csv_env("CORS_ALLOW_ORIGINS"))
 cors_allow_origin_regex = os.getenv(
     "CORS_ALLOW_ORIGIN_REGEX",
-    r"^https?://(localhost|127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+)(:\d+)?$",
+    r".*",
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_allow_origins if "*" not in cors_allow_origins else [],
     allow_origin_regex=cors_allow_origin_regex,
     allow_credentials=True,
     allow_methods=["*"],

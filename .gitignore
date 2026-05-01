@@ -7,29 +7,49 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+.pytest_cache/
 
 # Database & logs
 data/career.db
 data/*.log
 data/templates/
+*.db
+*.db-shm
+*.db-wal
 
 # Resume outputs (generated files)
 resume/*.docx
 resume/*.pdf
+resume/
 
 # Secrets / config override
 .env
+.env.production
+.env.local
+.env.*.local
 *.secret.yaml
 
 # Node
 frontend/node_modules/
 frontend/.next/
 frontend/out/
+node_modules/
 
-# VS Code
+# Testing cache
+.pytest_cache/
+backend/tests/__pycache__/
+
+# VS Code / JetBrains
 .vscode/
+.idea/
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Vercel
 .vercel
+
+# Runtime logs at root
+*.log
+

@@ -21,14 +21,14 @@ class ToggleRequest(BaseModel):
 
 
 @router.get("/import/{username}")
-async def import_github(username: str):
+async def import_github(username: str, user: dict = Depends(get_current_user)):
     """Fetch and save all GitHub repos for a user."""
     try:
         config = _load_config()
-        data = fetch_github(username)
+        data = fetch_github(username, user["id"])
         if not data:
             raise HTTPException(status_code=404, detail=f"GitHub user '{username}' not found")
-        projects = db.get_projects(limit=100, only_resume=False)
+        projects = db.get_projects(limit=100, only_resume=False, user_id=user["id"])
         return {
             "profile": data,
             "projects_saved": len(projects),
@@ -41,14 +41,14 @@ async def import_github(username: str):
 
 
 @router.get("/projects")
-async def list_projects(all: bool = False, page: int = 1, per_page: int = 50):
+async def list_projects(all: bool = False, page: int = 1, per_page: int = 50, user: dict = Depends(get_current_user)):
     """List stored GitHub projects."""
     try:
         page = max(page, 1)
         per_page = min(max(per_page, 1), 100)
         offset = (page - 1) * per_page
-        projects = db.get_projects(limit=per_page, only_resume=not all, offset=offset)
-        total = db.count_projects(only_resume=not all)
+        projects = db.get_projects(limit=per_page, only_resume=not all, offset=offset, user_id=user["id"])
+        total = db.count_projects(only_resume=not all, user_id=user["id"])
         return {
             "projects": projects,
             "count": len(projects),
@@ -62,10 +62,10 @@ async def list_projects(all: bool = False, page: int = 1, per_page: int = 50):
 
 
 @router.put("/projects/{project_id}")
-async def toggle_project(project_id: int, req: ToggleRequest):
+async def toggle_project(project_id: int, req: ToggleRequest, user: dict = Depends(get_current_user)):
     """Toggle whether a project appears on the resume."""
     try:
-        db.toggle_project_resume(project_id, req.show)
+        db.toggle_project_resume(project_id, req.show, user_id=user["id"])
         return {"success": True, "project_id": project_id, "show_on_resume": req.show}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

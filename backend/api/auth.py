@@ -82,12 +82,13 @@ def _issue_token(user: dict) -> tuple[str, str, datetime]:
 
 def _set_auth_cookie(response: Response, token: str) -> None:
     exp_seconds = int(get_settings().get("app", {}).get("jwt_exp_minutes", 120)) * 60
+    is_production = os.getenv("VERCEL") == "1" or os.getenv("NODE_ENV") == "production"
     response.set_cookie(
         key="access_token",
         value=token,
         httponly=True,
-        secure=False,
-        samesite="lax",
+        secure=is_production,
+        samesite="none" if is_production else "lax",
         max_age=exp_seconds,
         path="/",
     )

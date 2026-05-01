@@ -17,7 +17,7 @@ log = get_logger(__name__)
 #  GITHUB
 # ═══════════════════════════════════════════════════════════
 
-def fetch_github(username: str) -> dict:
+def fetch_github(username: str, user_id: int = 1) -> dict:
     if not username:
         return {}
     try:
@@ -47,7 +47,8 @@ def fetch_github(username: str) -> dict:
                     language=repo.get("language") or "N/A",
                     stars=repo.get("stargazers_count", 0),
                     url=repo.get("html_url", ""),
-                    topics=topics
+                    topics=topics,
+                    user_id=user_id
                 )
 
         data = {

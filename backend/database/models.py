@@ -293,6 +293,15 @@ def init_db() -> None:
             )
             """
         )
+        # Migration: add user_id to projects if missing
+        project_cols = {row[1] for row in c.execute("PRAGMA table_info(projects)").fetchall()}
+        if "user_id" not in project_cols:
+            c.execute("ALTER TABLE projects ADD COLUMN user_id INTEGER DEFAULT 1")
+            
+        # Migration: add user_id to applications if missing
+        app_cols = {row[1] for row in c.execute("PRAGMA table_info(applications)").fetchall()}
+        if "user_id" not in app_cols:
+            c.execute("ALTER TABLE applications ADD COLUMN user_id INTEGER DEFAULT 1")
         # Migration: add user_id to resumes if missing
         resume_cols = {row[1] for row in c.execute("PRAGMA table_info(resumes)").fetchall()}
         if "user_id" not in resume_cols:
@@ -417,29 +426,33 @@ def get_latest_snapshot(source: str) -> dict[str, Any]:
 
 # projects
 
-def upsert_project(name: str, description: str, language: str, stars: int, url: str, topics: str = "") -> None:
+def upsert_project(name: str, description: str, language: str, stars: int, url: str, topics: str = "", user_id: int = 1) -> None:
     with get_db() as conn:
         conn.execute(
             """
-            INSERT INTO projects (name, description, language, stars, url, topics, updated_at)
-            VALUES (?,?,?,?,?,?,?)
+            INSERT INTO projects (name, description, language, stars, url, topics, updated_at, user_id)
+            VALUES (?,?,?,?,?,?,?,?)
             ON CONFLICT(name) DO UPDATE SET
                 description=excluded.description,
                 language=excluded.language,
                 stars=excluded.stars,
                 url=excluded.url,
                 topics=excluded.topics,
-                updated_at=excluded.updated_at
+                updated_at=excluded.updated_at,
+                user_id=excluded.user_id
             """,
-            (name, description, language, stars, url, topics, datetime.now(timezone.utc).isoformat()),
+            (name, description, language, stars, url, topics, datetime.now(timezone.utc).isoformat(), user_id),
         )
 
 
-def get_projects(limit: int = 10, only_resume: bool = True, offset: int = 0) -> list[dict[str, Any]]:
-    q = "SELECT * FROM projects"
+def get_projects(limit: int = 10, only_resume: bool = True, offset: int = 0, user_id: int | None = None) -> list[dict[str, Any]]:
+    q = "SELECT * FROM projects WHERE 1=1"
     args: list[Any] = []
     if only_resume:
-        q += " WHERE show_on_resume=1"
+        q += " AND show_on_resume=1"
+    if user_id is not None:
+        q += " AND user_id=?"
+        args.append(user_id)
     q += " ORDER BY stars DESC LIMIT ? OFFSET ?"
     args.extend([limit, offset])
     with get_db() as conn:
@@ -447,36 +460,49 @@ def get_projects(limit: int = 10, only_resume: bool = True, offset: int = 0) -> 
     return [dict(r) for r in rows]
 
 
-def count_projects(only_resume: bool = True) -> int:
-    q = "SELECT COUNT(*) AS c FROM projects"
+def count_projects(only_resume: bool = True, user_id: int | None = None) -> int:
+    q = "SELECT COUNT(*) AS c FROM projects WHERE 1=1"
+    args: list[Any] = []
     if only_resume:
-        q += " WHERE show_on_resume=1"
+        q += " AND show_on_resume=1"
+    if user_id is not None:
+        q += " AND user_id=?"
+        args.append(user_id)
     with get_db() as conn:
-        row = conn.execute(q).fetchone()
+        row = conn.execute(q, tuple(args)).fetchone()
     return int(row["c"] if row else 0)
 
 
-def toggle_project_resume(project_id: int, show: bool) -> None:
+def toggle_project_resume(project_id: int, show: bool, user_id: int | None = None) -> None:
+    q = "UPDATE projects SET show_on_resume=? WHERE id=?"
+    args: list[Any] = [1 if show else 0, project_id]
+    if user_id is not None:
+        q += " AND user_id=?"
+        args.append(user_id)
     with get_db() as conn:
-        conn.execute("UPDATE projects SET show_on_resume=? WHERE id=?", (1 if show else 0, project_id))
+        conn.execute(q, tuple(args))
 
 
 # jobs
 
-def add_application(company: str, role: str, link: str = "", notes: str = "") -> int:
+def add_application(company: str, role: str, link: str = "", notes: str = "", user_id: int = 1) -> int:
     now = datetime.now(timezone.utc).isoformat()
     with get_db() as conn:
         cur = conn.execute(
-            "INSERT INTO applications (company, role, status, notes, link, applied_at, updated_at) VALUES (?,?,?,?,?,?,?)",
-            (company, role, "applied", notes, link, now, now),
+            "INSERT INTO applications (company, role, status, notes, link, applied_at, updated_at, user_id) VALUES (?,?,?,?,?,?,?,?)",
+            (company, role, "applied", notes, link, now, now, user_id),
         )
         row_id = cur.lastrowid
     return int(row_id or 0)
 
 
-def get_applications(limit: int | None = None, offset: int = 0) -> list[dict[str, Any]]:
-    q = "SELECT * FROM applications ORDER BY applied_at DESC"
+def get_applications(limit: int | None = None, offset: int = 0, user_id: int | None = None) -> list[dict[str, Any]]:
+    q = "SELECT * FROM applications WHERE 1=1"
     args: list[Any] = []
+    if user_id is not None:
+        q += " AND user_id=?"
+        args.append(user_id)
+    q += " ORDER BY applied_at DESC"
     if limit is not None:
         q += " LIMIT ? OFFSET ?"
         args.extend([limit, offset])
@@ -485,25 +511,39 @@ def get_applications(limit: int | None = None, offset: int = 0) -> list[dict[str
     return [dict(r) for r in rows]
 
 
-def count_applications() -> int:
+def count_applications(user_id: int | None = None) -> int:
+    q = "SELECT COUNT(*) AS c FROM applications WHERE 1=1"
+    args: list[Any] = []
+    if user_id is not None:
+        q += " AND user_id=?"
+        args.append(user_id)
     with get_db() as conn:
-        row = conn.execute("SELECT COUNT(*) AS c FROM applications").fetchone()
+        row = conn.execute(q, tuple(args)).fetchone()
     return int(row["c"] if row else 0)
 
 
-def update_application(app_id: int, **kwargs) -> None:
+def update_application(app_id: int, user_id: int | None = None, **kwargs) -> None:
     if not kwargs:
         return
     kwargs["updated_at"] = datetime.now(timezone.utc).isoformat()
     set_clause = ", ".join(f"{k}=?" for k in kwargs)
     values = list(kwargs.values()) + [app_id]
+    q = f"UPDATE applications SET {set_clause} WHERE id=?"
+    if user_id is not None:
+        q += " AND user_id=?"
+        values.append(user_id)
     with get_db() as conn:
-        conn.execute(f"UPDATE applications SET {set_clause} WHERE id=?", values)
+        conn.execute(q, values)
 
 
-def delete_application(app_id: int) -> None:
+def delete_application(app_id: int, user_id: int | None = None) -> None:
+    q = "DELETE FROM applications WHERE id=?"
+    args: list[Any] = [app_id]
+    if user_id is not None:
+        q += " AND user_id=?"
+        args.append(user_id)
     with get_db() as conn:
-        conn.execute("DELETE FROM applications WHERE id=?", (app_id,))
+        conn.execute(q, tuple(args))
 
 
 # resumes
