@@ -7,10 +7,10 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from pathlib import Path
 
-from backend.services.resume_builder import build_docx
-from backend.core.deps import get_current_user
-from backend.database import models as db
-from backend.core.settings import get_settings
+from services.resume_builder import build_docx
+from core.deps import get_current_user
+from database import models as db
+from core.settings import get_settings
 from math import ceil
 
 router = APIRouter(prefix="/api/resume", tags=["Resume"])

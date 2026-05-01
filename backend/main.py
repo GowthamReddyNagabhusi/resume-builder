@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 from slowapi import _rate_limit_exceeded_handler
 
-from backend.api import (
+from api import (
     ai,
     auth,
     career,
@@ -24,15 +24,15 @@ from backend.api import (
     stats,
     templates,
 )
-from backend.core.exceptions import (
+from core.exceptions import (
     generic_exception_handler,
     http_exception_handler,
     validation_exception_handler,
 )
-from backend.core.logger import get_logger
-from backend.core.rate_limit import limiter
-from backend.core.settings import get_settings
-from backend.database import models as db
+from core.logger import get_logger
+from core.rate_limit import limiter
+from core.settings import get_settings
+from database import models as db
 
 log = get_logger(__name__)
 START_TIME = datetime.now(timezone.utc)

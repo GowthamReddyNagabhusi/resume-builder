@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from pathlib import Path
 
-from backend.database import models as db
+from database import models as db
 
 try:
     from docx import Document

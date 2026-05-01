@@ -6,9 +6,9 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from math import ceil
 
-from backend.services.github_parser import fetch_github
-from backend.database import models as db
-from backend.core.settings import get_settings
+from services.github_parser import fetch_github
+from database import models as db
+from core.settings import get_settings
 
 router = APIRouter(prefix="/api/github", tags=["GitHub"])
 

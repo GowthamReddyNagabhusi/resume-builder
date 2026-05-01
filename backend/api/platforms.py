@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from fastapi import APIRouter, BackgroundTasks, Depends
 
-from backend.core.deps import get_current_user
-from backend.database import models as db
-from backend.services.platform_sync import sync_user_platform_data
+from core.deps import get_current_user
+from database import models as db
+from services.platform_sync import sync_user_platform_data
 
 router = APIRouter(prefix="/api/platforms", tags=["Platforms"])
 

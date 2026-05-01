@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from backend.core.logger import get_logger
+from core.logger import get_logger
 
 import os
 

@@ -5,9 +5,9 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from backend.core.deps import get_current_user
-from backend.database import models as db
-from backend.services.github_parser import fetch_github
+from core.deps import get_current_user
+from database import models as db
+from services.github_parser import fetch_github
 
 router = APIRouter(prefix="/api/profile", tags=["Profile"])
 

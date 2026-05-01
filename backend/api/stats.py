@@ -4,9 +4,9 @@ backend/api/stats.py — Stats snapshots and refresh endpoints
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 
-from backend.services.github_parser import update_all_stats
-from backend.database import models as db
-from backend.core.settings import get_settings
+from services.github_parser import update_all_stats
+from database import models as db
+from core.settings import get_settings
 
 router = APIRouter(prefix="/api/stats", tags=["Stats"])
 

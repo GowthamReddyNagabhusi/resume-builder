@@ -6,8 +6,8 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 
-from backend.core.deps import get_current_user
-from backend.database import models as db
+from core.deps import get_current_user
+from database import models as db
 from fastapi import Depends
 from math import ceil
 

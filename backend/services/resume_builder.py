@@ -8,9 +8,9 @@ import json
 from pathlib import Path
 from datetime import datetime
 
-from backend.services.ai_engine import generate_resume_bullets
-from backend.core.logger import get_logger
-from backend.database import models as db
+from services.ai_engine import generate_resume_bullets
+from core.logger import get_logger
+from database import models as db
 
 try:
     from docx import Document

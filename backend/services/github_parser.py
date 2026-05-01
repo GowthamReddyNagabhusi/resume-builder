@@ -6,8 +6,8 @@ All public APIs — no authentication required.
 
 import requests
 from datetime import datetime
-from backend.database import models as db
-from backend.core.logger import get_logger
+from database import models as db
+from core.logger import get_logger
 
 TIMEOUT = 15
 log = get_logger(__name__)

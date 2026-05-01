@@ -8,15 +8,15 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
-from backend.services.ai_engine import (
+from services.ai_engine import (
     generate, generate_cover_letter,
     suggest_resume_improvements, check_ai_status
 )
-from backend.core.rate_limit import limiter
-from backend.core.settings import get_settings
-from backend.core.deps import get_current_user
+from core.rate_limit import limiter
+from core.settings import get_settings
+from core.deps import get_current_user
 from fastapi import Depends
-from backend.database import models as db
+from database import models as db
 
 router = APIRouter(prefix="/api/ai", tags=["AI"])
 

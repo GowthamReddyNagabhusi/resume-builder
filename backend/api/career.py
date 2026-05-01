@@ -8,9 +8,9 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from backend.core.deps import get_current_user
-from backend.core.logger import get_logger
-from backend.database import models as db
+from core.deps import get_current_user
+from core.logger import get_logger
+from database import models as db
 
 router = APIRouter(prefix="/api/career", tags=["Career Data"])
 log = get_logger(__name__)

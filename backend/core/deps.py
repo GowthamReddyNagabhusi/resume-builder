@@ -5,9 +5,9 @@ from __future__ import annotations
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from backend.core.security import decode_access_token
-from backend.core.settings import get_settings
-from backend.database import models as db
+from core.security import decode_access_token
+from core.settings import get_settings
+from database import models as db
 
 bearer_scheme = HTTPBearer(auto_error=False)
 

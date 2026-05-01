@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from backend.database import models as db
-from backend.services.github_parser import fetch_codeforces, fetch_github, fetch_leetcode
+from database import models as db
+from services.github_parser import fetch_codeforces, fetch_github, fetch_leetcode
 
 SUPPORTED = {
     "leetcode": fetch_leetcode,

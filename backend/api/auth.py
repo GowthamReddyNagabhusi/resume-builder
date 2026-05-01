@@ -13,12 +13,12 @@ from fastapi.responses import RedirectResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, EmailStr, Field
 
-from backend.core.deps import get_current_user
-from backend.core.logger import get_logger
-from backend.core.rate_limit import limiter
-from backend.core.security import create_access_token, decode_access_token, hash_password, verify_password
-from backend.core.settings import get_settings
-from backend.database import models as db
+from core.deps import get_current_user
+from core.logger import get_logger
+from core.rate_limit import limiter
+from core.security import create_access_token, decode_access_token, hash_password, verify_password
+from core.settings import get_settings
+from database import models as db
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 bearer_scheme = HTTPBearer(auto_error=False)

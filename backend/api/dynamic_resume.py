@@ -9,9 +9,9 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from math import ceil
 
-from backend.core.deps import get_current_user
-from backend.database import models as db
-from backend.services.dynamic_resume_builder import build_dynamic_resume
+from core.deps import get_current_user
+from database import models as db
+from services.dynamic_resume_builder import build_dynamic_resume
 
 router = APIRouter(prefix="/api/dynamic-resume", tags=["Dynamic Resume"])
 

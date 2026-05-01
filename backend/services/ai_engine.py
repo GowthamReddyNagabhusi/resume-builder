@@ -6,7 +6,7 @@ Groq-powered AI engine.
 import json
 import requests
 
-from backend.core.logger import get_logger
+from core.logger import get_logger
 
 GROQ_URL  = "https://api.groq.com/openai/v1/chat/completions"
 GROQ_MODEL = "llama-3.1-8b-instant"   # free tier, fast
