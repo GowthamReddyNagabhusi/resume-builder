@@ -2,12 +2,13 @@
 backend/api/github.py — GitHub import and project management endpoints
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from math import ceil
 
 from services.github_parser import fetch_github
 from database import models as db
+from core.deps import get_current_user
 from core.settings import get_settings
 
 router = APIRouter(prefix="/api/github", tags=["GitHub"])
